@@ -8,14 +8,27 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="hero">
-      <img
-        src="First Frame.jpg"
-        alt="A boy holding a ruler up to the sky"
-        fetchpriority="high"
-        decoding="sync"
-        draggable="false"
-      />
+    <main class="scrub">
+      <div class="pin">
+        <img
+          src="First Frame.jpg"
+          alt="A boy holding a ruler up to the sky"
+          fetchpriority="high"
+          decoding="sync"
+          draggable="false"
+        />
+        <video
+          class="hero-video"
+          muted
+          playsinline
+          webkit-playsinline
+          preload="none"
+          disablepictureinpicture
+          disableremoteplayback
+          poster="First Frame.jpg"
+        ></video>
+      </div>
     </main>
+    <script src="scrub.js"></script>
   </body>
 </html>

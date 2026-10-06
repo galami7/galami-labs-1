@@ -9,21 +9,27 @@
 html,
 body {
   margin: 0;
-  height: 100%;
   background: var(--sky);
   color-scheme: light;
 }
 
-body {
-  overflow: hidden;
+.scrub {
+  height: 400vh;
 }
 
-.hero {
+.pin {
+  position: sticky;
+  top: 0;
   height: 100dvh;
   width: 100%;
+  overflow: hidden;
+  background: var(--sky);
 }
 
-.hero img {
+.pin img,
+.pin video {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -31,4 +37,23 @@ body {
   object-position: center center;
   user-select: none;
   -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.pin video {
+  opacity: 0;
+}
+
+.pin video.is-ready {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrub {
+    height: 100dvh;
+  }
+
+  .pin video {
+    display: none;
+  }
 }
