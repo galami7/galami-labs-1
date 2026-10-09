@@ -6,29 +6,257 @@
     <meta name="theme-color" content="#3f6fc4" />
     <title>Galami Labs</title>
     <link rel="stylesheet" href="styles.css" />
+    <script>
+      if (matchMedia("(max-aspect-ratio: 4/5)").matches) {
+        document.documentElement.classList.add("is-phone");
+      }
+    </script>
+    <style>
+      .home .start-still,
+      .home .hero-video,
+      .home .end-still {
+        transform-origin: center center;
+      }
+
+      .home .next {
+        width: 3.25rem;
+        height: 3.25rem;
+        bottom: calc(1.85rem + env(safe-area-inset-bottom));
+        background: #fff;
+        color: #141414;
+        box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
+        transform: translateX(-50%);
+        transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .home .next svg {
+        width: 1.45rem;
+        height: 1.45rem;
+      }
+
+      .home .next svg path {
+        stroke-width: 1.8;
+      }
+
+      .home .next:hover,
+      .home .next:focus-visible {
+        transform: translateX(-50%) scale(1.12);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .home .next {
+          transition: none;
+        }
+      }
+    </style>
   </head>
   <body>
     <main class="scrub">
-      <div class="pin">
-        <img
-          src="First Frame.jpg"
-          alt="A boy holding a ruler up to the sky"
-          fetchpriority="high"
-          decoding="sync"
-          draggable="false"
-        />
+      <div class="pin home">
+        <picture>
+          <source media="(max-aspect-ratio: 4/5)" srcset="Mobile%20First%20Frame.jpg" />
+          <img
+            class="start-still"
+            src="trial-first.jpg"
+            alt="A boy holding a ruler up to the sky"
+            fetchpriority="high"
+            decoding="sync"
+            draggable="false"
+          />
+        </picture>
         <video
           class="hero-video"
           muted
           playsinline
           webkit-playsinline
-          preload="none"
+          preload="auto"
           disablepictureinpicture
           disableremoteplayback
-          poster="First Frame.jpg"
+          data-scrub="scrub-trial.mp4"
         ></video>
+        <picture>
+          <source media="(max-aspect-ratio: 4/5)" srcset="Mobile%20Middle%20Frame.jpg" />
+          <img
+            class="end-still"
+            src="Final Middle Frame.jpg"
+            alt="A boy standing in a meadow, looking at the mountains"
+            draggable="false"
+            aria-hidden="true"
+          />
+        </picture>
+        <h1 class="wordmark">Galami Labs</h1>
+        <button type="button" class="next" aria-label="Scroll to next">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="peaks" hidden>
+          <img class="range" src="Long Mountain Range.jpg" alt="Rigi, Pilatus, and the Matterhorn" draggable="false" />
+          <img class="peak-close" src="Mountain Peak 3.0.jpg" alt="The boy standing on a snowy summit, with another peak beyond" draggable="false" />
+          <div class="range-notes">
+            <article class="phase">
+              <div class="phase-copy">
+                <p class="phase-kicker">Phase 1</p>
+                <h2 class="phase-title">Agentic AI</h2>
+                <p class="phase-text">Learn to use agents on real workflows</p>
+              </div>
+            </article>
+            <article class="phase">
+              <div class="phase-copy">
+                <p class="phase-kicker">Phase 2</p>
+                <h2 class="phase-title">Build Software</h2>
+                <p class="phase-text">Create software people can open and use</p>
+              </div>
+            </article>
+            <article class="phase">
+              <div class="phase-copy">
+                <p class="phase-kicker">Phase 3</p>
+                <h2 class="phase-title">Launch Consultancy</h2>
+                <p class="phase-text">Put this to work on company projects</p>
+              </div>
+            </article>
+            <article class="phase">
+              <div class="contact-card">
+                <div class="contact-intro">
+                  <p class="contact-kicker">Thanks for the visit!</p>
+                  <h2 class="contact-title">Join the Expedition</h2>
+                  <form class="contact-email">
+                    <label for="expedition-email">Email</label>
+                    <div class="contact-email-row">
+                      <span class="contact-email-field">
+                        <input id="expedition-email" type="email" name="email" required autocomplete="email" placeholder="Your email" />
+                      </span>
+                      <button type="submit">Join</button>
+                    </div>
+                    <p class="contact-status" hidden></p>
+                  </form>
+                </div>
+                <div class="contact-close">
+                  <p class="contact-sign">Galami Labs by Guillaume Gruyters.</p>
+                  <p class="contact-touch">
+                    <a href="mailto:guillaume.gruyters@gmail.com">Email</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="https://www.linkedin.com/in/guillaume-gruyters/" target="_blank" rel="noreferrer">LinkedIn</a>
+                  </p>
+                </div>
+              </div>
+              <a class="next-peak" href="https://www.guillaumegruyters.com/" target="_blank" rel="noreferrer" aria-label="Want to explore more? guillaumegruyters.com">
+                <span class="next-peak-label">
+                  <span class="next-peak-copy">
+                    <span class="next-peak-name">Want to explore more?</span>
+                    <span class="next-peak-meta">click here</span>
+                  </span>
+                  <span class="next-peak-site">guillaumegruyters.com</span>
+                </span>
+                <span class="next-peak-line"></span>
+              </a>
+            </article>
+          </div>
+        </div>
+        <div class="statement">
+          <p class="statement-title">3 Peaks. 3 Phases.</p>
+          <p class="statement-hint hint-hover">Hover over the mountains to explore the peaks</p>
+          <p class="statement-hint hint-tap">Tap a mountain to explore the peaks</p>
+        </div>
+        <div class="summits" aria-hidden="true">
+          <button type="button" class="summit" data-x="0.189" data-y="0.329" data-phone-x="0.172" data-phone-y="0.388" aria-label="Rigi, 1,798 meters">
+            <span class="summit-label"><span class="summit-name">Rigi</span><span class="summit-height">1,798 m</span></span>
+            <span class="summit-line"></span>
+          </button>
+          <button type="button" class="summit summit-pilatus" data-x="0.480" data-y="0.273" data-phone-x="0.488" data-phone-y="0.368" aria-label="Pilatus, 2,128 meters">
+            <span class="summit-label"><span class="summit-name">Pilatus</span><span class="summit-height">2,128 m</span></span>
+            <span class="summit-line"></span>
+          </button>
+          <button type="button" class="summit" data-x="0.815" data-y="0.222" data-phone-x="0.858" data-phone-y="0.332" aria-label="Matterhorn, 4,478 meters">
+            <span class="summit-label"><span class="summit-name">Matterhorn</span><span class="summit-height">4,478 m</span></span>
+            <span class="summit-line"></span>
+          </button>
+        </div>
+        <div class="peak-readout" hidden>
+          <span class="peak-readout-live"></span>
+          <div class="height-lock" aria-hidden="true">
+            <span class="height-wheel"><span class="height-reel"></span></span>
+            <span class="height-sep">,</span>
+            <span class="height-wheel"><span class="height-reel"></span></span>
+            <span class="height-wheel"><span class="height-reel"></span></span>
+            <span class="height-wheel"><span class="height-reel"></span></span>
+            <span class="height-sep"> m</span>
+          </div>
+          <p class="altitude-label" aria-hidden="true">(Altitude)</p>
+        </div>
+        <div class="flash" hidden></div>
+        <button type="button" class="advance" hidden>Explore the Range</button>
+        <button type="button" class="step step-prev" hidden aria-label="Previous mountain">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button type="button" class="peak-exit" hidden aria-label="Back to the mountains">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </button>
+        <button type="button" class="step step-next" hidden aria-label="Next mountain">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
       </div>
     </main>
     <script src="scrub.js"></script>
+    <script>
+      const homePin = document.querySelector(".home");
+      const homeLayers = homePin.querySelectorAll(".start-still, .hero-video, .end-still");
+      const homeNext = document.querySelector(".next");
+      const homeTrack = document.querySelector(".scrub");
+      const openingBoy = 0.5159;
+      const openingScale = 1 / (1 - 2 * Math.abs(openingBoy - 0.5));
+
+      const phoneLayout = () => matchMedia("(max-aspect-ratio: 4/5)").matches;
+
+      const placeOpening = () => {
+        if (phoneLayout()) {
+          homeLayers.forEach((layer) => {
+            layer.style.transform = "";
+          });
+          return;
+        }
+        const max = Math.max(0, homeTrack.offsetHeight - window.innerHeight);
+        const progress = max ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        const hold = 1 - progress;
+        const scale = 1 + (openingScale - 1) * hold;
+        const shift = -(openingBoy - 0.5) * homePin.clientWidth * scale * hold;
+        const transform = `translate3d(${shift}px, 0, 0) scale(${scale})`;
+        homeLayers.forEach((layer) => {
+          layer.style.transform = transform;
+        });
+        if (homeNext) homeNext.style.left = `${homePin.clientWidth / 2}px`;
+      };
+
+      const placeOpeningAfter = () => requestAnimationFrame(placeOpening);
+      window.addEventListener("scroll", placeOpeningAfter, { passive: true });
+      window.addEventListener("resize", placeOpeningAfter);
+      window.addEventListener("load", placeOpeningAfter);
+      const homeEnd = homePin.querySelector(".end-still");
+      if (homeEnd) homeEnd.addEventListener("load", placeOpeningAfter);
+      placeOpeningAfter();
+
+      const emailForm = document.querySelector(".contact-email");
+      if (emailForm) {
+        emailForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const email = new FormData(emailForm).get("email").trim();
+          const status = emailForm.querySelector(".contact-status");
+          if (!email) return;
+          const mail = `mailto:guillaume.gruyters@gmail.com?subject=${encodeURIComponent("Join the Expedition")}&body=${encodeURIComponent(email)}`;
+          window.location.href = mail;
+          emailForm.reset();
+          if (status) {
+            status.hidden = false;
+            status.textContent = "That opens in your mail app.";
+          }
+        });
+      }
+    </script>
   </body>
 </html>

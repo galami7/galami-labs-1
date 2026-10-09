@@ -1,38 +1,227 @@
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+window.scrollTo(0, 0);
+
 const video = document.querySelector(".hero-video");
 const track = document.querySelector(".scrub");
+const pin = document.querySelector(".pin");
+const endStill = document.querySelector(".end-still");
+const nextButton = document.querySelector(".next");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const phoneQuery = window.matchMedia("(max-aspect-ratio: 4/5)");
+const isPhone = () => phoneQuery.matches;
 
-if (!reduceMotion.matches) {
-  const fps = 24;
-  let frame = -1;
-  let queued = false;
+const maxScroll = () => Math.max(0, track.offsetHeight - window.innerHeight);
 
-  const seek = () => {
-    queued = false;
-    const distance = track.offsetHeight - window.innerHeight;
-    const progress = distance > 0 ? Math.min(1, Math.max(0, window.scrollY / distance)) : 0;
+const progress = () => {
+  const distance = maxScroll();
+  return distance > 0 ? Math.min(1, Math.max(0, window.scrollY / distance)) : 0;
+};
+
+const updateChrome = () => {
+  const amount = progress();
+  const atEnd = amount > (isPhone() ? 0.8 : 0.98);
+  const atStart = amount <= 0.02 && !playing && !driving;
+  pin.classList.toggle("is-away", !atStart);
+  pin.classList.toggle("is-end", atEnd);
+  if (isPhone()) {
+    const blend = Math.min(1, Math.max(0, amount / 0.8));
+    pin.style.setProperty("--mix", blend.toFixed(4));
+  } else {
+    pin.style.removeProperty("--mix");
+  }
+  endStill.setAttribute("aria-hidden", atEnd ? "false" : "true");
+  nextButton.disabled = !atStart;
+  nextButton.setAttribute("aria-hidden", atStart ? "false" : "true");
+  syncPeaks();
+};
+
+let frame = -1;
+let queued = false;
+let playing = false;
+let driving = false;
+let playFrame = 0;
+
+// v8 plays forward instead of jumping between frames.
+// Hands lower from about 1.3s to 2.9s, at half speed. The rest runs at double speed.
+const handsSegments = [
+  { until: 1.3, rate: 2 },
+  { until: 2.9, rate: 0.5 },
+  { until: Infinity, rate: 2 },
+];
+const handsPoints = [
+  [0, 0],
+  [0.12, 0.215],
+  [0.71, 0.48],
+  [1, 1],
+];
+
+const videoProgress = (amount) => {
+  if (video.dataset.pace !== "hands") return amount;
+  for (let i = 1; i < handsPoints.length; i += 1) {
+    const [start, from] = handsPoints[i - 1];
+    const [end, to] = handsPoints[i];
+    if (amount <= end) {
+      return from + ((amount - start) / (end - start)) * (to - from);
+    }
+  }
+  return 1;
+};
+
+const scrollProgressForVideo = (amount) => {
+  for (let i = 1; i < handsPoints.length; i += 1) {
+    const [start, from] = handsPoints[i - 1];
+    const [end, to] = handsPoints[i];
+    if (amount <= to) {
+      return start + ((amount - from) / (to - from)) * (end - start);
+    }
+  }
+  return 1;
+};
+
+const handsRate = (time) => {
+  for (const segment of handsSegments) {
+    if (time < segment.until) return segment.rate;
+  }
+  return 2;
+};
+
+const seek = () => {
+  queued = false;
+  updateChrome();
+  if (isPhone()) return;
+  if (driving) return;
+  const duration = video.duration;
+  if (!Number.isFinite(duration) || duration <= 0 || video.seekable.length === 0) return;
+
+  const count = Math.max(1, Math.round(duration * 24));
+  const next = Math.round(videoProgress(progress()) * (count - 1));
+  if (next === frame) return;
+
+  frame = next;
+  video.currentTime = next / 24;
+};
+
+const requestSeek = () => {
+  if (queued) return;
+  queued = true;
+  requestAnimationFrame(seek);
+};
+
+const stopPlayback = () => {
+  playing = false;
+  driving = false;
+  cancelAnimationFrame(playFrame);
+  video.pause();
+  video.playbackRate = 1;
+};
+
+const playHands = () => {
+  driving = true;
+  video.currentTime = 0;
+  video.playbackRate = handsSegments[0].rate;
+  frame = -1;
+
+  const follow = () => {
+    if (!driving) return;
     const duration = video.duration;
-    if (!Number.isFinite(duration) || duration <= 0) return;
+    if (!Number.isFinite(duration) || duration <= 0) {
+      playFrame = requestAnimationFrame(follow);
+      return;
+    }
 
-    const count = Math.max(1, Math.round(duration * fps));
-    const next = Math.round(progress * (count - 1));
-    if (next === frame) return;
+    const targetRate = handsRate(video.currentTime);
+    if (Math.abs(video.playbackRate - targetRate) > 0.04) {
+      video.playbackRate += (targetRate - video.playbackRate) * 0.35;
+    } else {
+      video.playbackRate = targetRate;
+    }
+    const amount = Math.min(1, video.currentTime / duration);
+    window.scrollTo(0, scrollProgressForVideo(amount) * maxScroll());
 
-    frame = next;
-    video.currentTime = next / fps;
+    if (video.ended || amount >= 0.995) {
+      driving = false;
+      playing = false;
+      video.pause();
+      video.playbackRate = 1;
+      window.scrollTo(0, maxScroll());
+      updateChrome();
+      return;
+    }
+
+    playFrame = requestAnimationFrame(follow);
   };
 
-  const requestSeek = () => {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(seek);
+  const started = video.play();
+  if (started && typeof started.catch === "function") {
+    started.catch(() => {
+      driving = false;
+      playing = false;
+    });
+  }
+  playFrame = requestAnimationFrame(follow);
+};
+
+const playToEnd = () => {
+  if (reduceMotion.matches || maxScroll() === 0) {
+    pin.classList.add("is-end");
+    endStill.setAttribute("aria-hidden", "false");
+    syncPeaks();
+    return;
+  }
+
+  stopPlayback();
+  playing = true;
+  pin.classList.add("is-away");
+  nextButton.disabled = true;
+
+  if (video.dataset.pace === "hands") {
+    playHands();
+    return;
+  }
+
+  const start = window.scrollY;
+  const target = maxScroll();
+  const duration = 2000;
+  const startedAt = performance.now();
+
+  const step = (now) => {
+    if (!playing) return;
+    const t = Math.min(1, (now - startedAt) / duration);
+    window.scrollTo(0, start + (target - start) * t);
+    requestSeek();
+    if (t < 1) {
+      playFrame = requestAnimationFrame(step);
+      return;
+    }
+    playing = false;
+    window.scrollTo(0, target);
+    updateChrome();
   };
+
+  playFrame = requestAnimationFrame(step);
+};
+
+nextButton.addEventListener("click", playToEnd);
+window.addEventListener("wheel", () => {
+  if (playing) stopPlayback();
+}, { passive: true });
+window.addEventListener("touchmove", () => {
+  if (playing) stopPlayback();
+}, { passive: true });
+
+let videoReady = false;
+
+const enableVideo = () => {
+  if (videoReady || reduceMotion.matches || isPhone()) return;
+  videoReady = true;
 
   const reveal = () => {
     video.classList.add("is-ready");
   };
 
   video.addEventListener("loadedmetadata", requestSeek);
+  video.addEventListener("canplay", requestSeek);
+  video.addEventListener("progress", requestSeek);
   video.addEventListener("seeked", reveal);
   if ("requestVideoFrameCallback" in video) {
     video.addEventListener("loadeddata", () => {
@@ -41,6 +230,7 @@ if (!reduceMotion.matches) {
   }
 
   video.addEventListener("loadeddata", () => {
+    video.removeAttribute("poster");
     const started = video.play();
     const unlock = () => {
       video.pause();
@@ -54,7 +244,265 @@ if (!reduceMotion.matches) {
   });
 
   video.preload = "auto";
-  video.src = "scrub.mp4";
+  video.poster = "trial-first.jpg";
+  video.src = video.dataset.scrub || "scrub.mp4";
   window.addEventListener("scroll", requestSeek, { passive: true });
   window.addEventListener("resize", requestSeek);
+};
+
+if (!reduceMotion.matches && !isPhone()) {
+  enableVideo();
+} else if (!isPhone()) {
+  window.addEventListener("scroll", updateChrome, { passive: true });
 }
+
+window.addEventListener("scroll", () => {
+  if (isPhone()) updateChrome();
+}, { passive: true });
+window.addEventListener("resize", () => {
+  if (isPhone()) updateChrome();
+});
+
+const peaks = document.querySelector(".peaks");
+const advance = document.querySelector(".advance");
+const prevStep = document.querySelector(".step-prev");
+const nextStep = document.querySelector(".step-next");
+const summitLayer = document.querySelector(".summits");
+const peakExit = document.querySelector(".peak-exit");
+const peakReadout = document.querySelector(".peak-readout");
+const peakHeights = ["1,798 m", "2,128 m", "4,478 m"];
+const heightDigits = [
+  [1, 7, 9, 8],
+  [2, 1, 2, 8],
+  [4, 4, 7, 8],
+];
+let lastHeightIndex = 0;
+let heightRoll = 0;
+
+const fillHeightReels = () => {
+  if (!peakReadout) return;
+  const sequence = [...Array(10).keys(), ...Array(10).keys()];
+  peakReadout.querySelectorAll(".height-reel").forEach((reel) => {
+    reel.replaceChildren(...sequence.map((digit) => {
+      const span = document.createElement("span");
+      span.textContent = String(digit);
+      return span;
+    }));
+  });
+};
+
+const snapHeights = (index) => {
+  if (!peakReadout) return;
+  peakReadout.querySelectorAll(".height-reel").forEach((reel, i) => {
+    reel.style.transition = "none";
+    reel.style.transform = `translateY(${-heightDigits[index][i]}em)`;
+  });
+  lastHeightIndex = index;
+};
+
+const rollHeights = (index) => {
+  if (!peakReadout) return;
+  const forward = index >= lastHeightIndex;
+  const token = ++heightRoll;
+  peakReadout.querySelectorAll(".height-reel").forEach((reel, i) => {
+    const to = heightDigits[index][i];
+    const cell = reel.firstElementChild;
+    const cellHeight = cell ? cell.getBoundingClientRect().height : 0;
+    const matrix = new DOMMatrix(getComputedStyle(reel).transform);
+    const from = cellHeight ? Math.round(Math.abs(matrix.m42) / cellHeight) % 10 : 0;
+    const steps = forward ? (to - from + 10) % 10 : (from - to + 10) % 10;
+    if (!steps || reduceMotion.matches) {
+      reel.style.transition = "none";
+      reel.style.transform = `translateY(${-to}em)`;
+      return;
+    }
+    const start = forward ? from : from + 10;
+    const end = forward ? from + steps : from + 10 - steps;
+    reel.style.transition = "none";
+    reel.style.transform = `translateY(${-start}em)`;
+    void reel.offsetWidth;
+    reel.dataset.roll = String(token);
+    reel.style.transition = `transform ${Math.max(0.45, steps * 0.16)}s cubic-bezier(0.4, 0.05, 0.2, 1)`;
+    reel.style.transform = `translateY(${-end}em)`;
+    reel.ontransitionend = (event) => {
+      if (event.propertyName !== "transform" || reel.dataset.roll !== String(token)) return;
+      reel.ontransitionend = null;
+      reel.style.transition = "none";
+      reel.style.transform = `translateY(${-to}em)`;
+    };
+  });
+  lastHeightIndex = index;
+};
+
+fillHeightReels();
+snapHeights(0);
+const peakCount = document.querySelector(".peak-close") ? 4 : document.querySelector(".range") ? 3 : 0;
+let peakIndex = 0;
+
+const placeSummits = () => {
+  if (!summitLayer || !endStill.naturalWidth) return;
+  const viewW = pin.clientWidth;
+  const viewH = pin.clientHeight;
+  const scale = Math.max(viewW / endStill.naturalWidth, viewH / endStill.naturalHeight);
+  const offsetX = (viewW - endStill.naturalWidth * scale) / 2;
+  const offsetY = (viewH - endStill.naturalHeight * scale) / 2;
+  const markerX = (marker) => Number(isPhone() && marker.dataset.phoneX ? marker.dataset.phoneX : marker.dataset.x);
+  const markerY = (marker) => Number(isPhone() && marker.dataset.phoneY ? marker.dataset.phoneY : marker.dataset.y);
+  summitLayer.querySelectorAll(".summit").forEach((marker) => {
+    marker.style.left = `${offsetX + markerX(marker) * endStill.naturalWidth * scale}px`;
+    marker.style.top = `${offsetY + markerY(marker) * endStill.naturalHeight * scale}px`;
+  });
+  const along = (nx) => `${offsetX + nx * endStill.naturalWidth * scale}px`;
+  if (nextButton) nextButton.style.left = along(isPhone() ? 0.5 : 0.516);
+  const advanceButton = document.querySelector(".advance");
+  if (advanceButton) advanceButton.style.left = along(isPhone() ? 0.5 : 0.496);
+};
+
+if (summitLayer) {
+  if (endStill.complete && endStill.naturalWidth) placeSummits();
+  endStill.addEventListener("load", placeSummits);
+  window.addEventListener("resize", placeSummits);
+}
+
+function syncPeaks() {
+  if (!advance) return;
+  const open = pin.classList.contains("is-peaks");
+  const atEnd = pin.classList.contains("is-end");
+  advance.hidden = open || !atEnd;
+  if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
+  if (nextStep) nextStep.hidden = !open || peakIndex >= peakCount - 1;
+  if (peakExit) peakExit.hidden = !open;
+  if (peakReadout) {
+    const index = Math.min(peakIndex, 2);
+    const showReadout = open && peakIndex < 3;
+    peakReadout.hidden = !showReadout;
+    if (showReadout) {
+      if (index !== lastHeightIndex) rollHeights(index);
+    } else if (lastHeightIndex !== 0) {
+      snapHeights(0);
+    }
+    const live = peakReadout.querySelector(".peak-readout-live");
+    if (live) live.textContent = showReadout ? `${peakHeights[index]} (Altitude)` : "";
+  }
+  if (summitLayer) summitLayer.setAttribute("aria-hidden", atEnd && !open ? "false" : "true");
+}
+
+let peakPosition = 0;
+let peakFrame = 0;
+let slideFrom = 0;
+let slideTo = 0;
+let slideStart = 0;
+let slideDuration = 0.62;
+
+const easeSlide = (t) => 1 - (1 - t) ** 2;
+
+const springPeak = (now) => {
+  const t = Math.min(1, (now - slideStart) / (slideDuration * 1000));
+  peakPosition = slideFrom + (slideTo - slideFrom) * easeSlide(t);
+  if (t >= 1) {
+    peakPosition = slideTo;
+    peakFrame = 0;
+  } else {
+    peakFrame = requestAnimationFrame(springPeak);
+  }
+  peaks.style.setProperty("--peak", String(peakPosition));
+};
+
+const showPeak = (index) => {
+  if (!peaks || index < 0 || index >= peakCount) return;
+  if (index === peakIndex) {
+    syncPeaks();
+    return;
+  }
+  peakIndex = index;
+  syncPeaks();
+  slideFrom = peakPosition;
+  slideTo = index;
+  slideDuration = Math.min(0.72, 0.46 + Math.abs(slideTo - slideFrom) * 0.08);
+  slideStart = performance.now();
+  if (reduceMotion.matches) {
+    cancelAnimationFrame(peakFrame);
+    peakFrame = 0;
+    peakPosition = index;
+    peaks.style.setProperty("--peak", String(index));
+    return;
+  }
+  if (!peakFrame) peakFrame = requestAnimationFrame(springPeak);
+};
+
+const flash = document.querySelector(".flash");
+
+const playFlash = () => {
+  if (!flash || reduceMotion.matches) return;
+  flash.hidden = false;
+  flash.classList.remove("is-on");
+  void flash.offsetWidth;
+  flash.classList.add("is-on");
+  flash.addEventListener("animationend", () => {
+    flash.classList.remove("is-on");
+    flash.hidden = true;
+  }, { once: true });
+};
+
+const openPeaks = (index) => {
+  pin.classList.add("is-peaks");
+  peaks.hidden = false;
+  showPeak(index);
+  playFlash();
+};
+
+if (peaks && advance && prevStep && nextStep) {
+  advance.addEventListener("click", () => openPeaks(0));
+  if (summitLayer) {
+    summitLayer.querySelectorAll(".summit").forEach((marker, index) => {
+      marker.addEventListener("click", () => {
+        if (!isPhone() || !pin.classList.contains("is-end")) return;
+        openPeaks(index);
+      });
+    });
+  }
+  let swipeX = 0;
+  let swipeY = 0;
+  pin.addEventListener("touchstart", (event) => {
+    swipeX = event.changedTouches[0].clientX;
+    swipeY = event.changedTouches[0].clientY;
+  }, { passive: true });
+  pin.addEventListener("touchend", (event) => {
+    if (!pin.classList.contains("is-peaks")) return;
+    const dx = event.changedTouches[0].clientX - swipeX;
+    const dy = event.changedTouches[0].clientY - swipeY;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    showPeak(peakIndex + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+  prevStep.addEventListener("click", () => showPeak(peakIndex - 1, true));
+  nextStep.addEventListener("click", () => showPeak(peakIndex + 1, true));
+  const closePeaks = () => {
+    pin.classList.remove("is-peaks");
+    peaks.hidden = true;
+    cancelAnimationFrame(peakFrame);
+    peakFrame = 0;
+    peakIndex = 0;
+    peakPosition = 0;
+    peaks.style.setProperty("--peak", "0");
+    syncPeaks();
+  };
+  if (peakExit) peakExit.addEventListener("click", closePeaks);
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && pin.classList.contains("is-peaks")) closePeaks();
+  });
+  const keepPeaks = (event) => {
+    if (pin.classList.contains("is-peaks")) event.preventDefault();
+  };
+  window.addEventListener("wheel", keepPeaks, { passive: false });
+  window.addEventListener("touchmove", keepPeaks, { passive: false });
+}
+
+phoneQuery.addEventListener("change", () => {
+  document.documentElement.classList.toggle("is-phone", isPhone());
+  if (isPhone() && playing) stopPlayback();
+  if (!isPhone() && !reduceMotion.matches) enableVideo();
+  placeSummits();
+  updateChrome();
+});
+
+updateChrome();
