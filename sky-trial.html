@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#3f6fc4" />
+    <title>Galami Labs — sky trial</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .trial-pin .start-still,
+      .trial-pin .hero-video,
+      .trial-pin .end-still {
+        transform-origin: center center;
+      }
+
+      .trial-pin .next {
+        width: 4rem;
+        height: 4rem;
+        bottom: calc(2.15rem + env(safe-area-inset-bottom));
+        background: #fff;
+        border: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transform: translateX(-50%);
+        transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .trial-pin .next svg {
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+
+      .trial-pin .next:hover,
+      .trial-pin .next:focus-visible {
+        transform: translateX(-50%) scale(1.14);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .trial-pin .next {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="scrub">
+      <div class="pin trial-pin">
+        <img
+          class="start-still"
+          src="trial-first.jpg"
+          alt="A boy holding a ruler up to the sky"
+          fetchpriority="high"
+          decoding="sync"
+          draggable="false"
+        />
+        <video
+          class="hero-video"
+          muted
+          playsinline
+          webkit-playsinline
+          preload="auto"
+          disablepictureinpicture
+          disableremoteplayback
+          poster="trial-first.jpg"
+          data-scrub="scrub-trial.mp4"
+        ></video>
+        <img
+          class="end-still"
+          src="Final Middle Frame.jpg"
+          alt="A boy standing in a meadow, looking at the mountains"
+          draggable="false"
+          aria-hidden="true"
+        />
+        <h1 class="wordmark">Galami Labs</h1>
+        <button type="button" class="next" aria-label="Scroll to next">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="peaks" hidden>
+          <img class="range" src="Long Mountain Range.jpg" alt="Rigi, Pilatus, and the Matterhorn" draggable="false" />
+        </div>
+        <div class="statement">
+          <p class="statement-title">3 Peaks. 3 Phases.</p>
+          <p class="statement-hint">Hover over the mountains to explore the peaks</p>
+        </div>
+        <div class="summits" aria-hidden="true">
+          <button type="button" class="summit" data-x="0.189" data-y="0.329" aria-label="Rigi, 1,798 meters">
+            <span class="summit-label"><span class="summit-name">Rigi</span><span class="summit-height">1,798 m</span></span>
+            <span class="summit-line"></span>
+          </button>
+          <button type="button" class="summit summit-pilatus" data-x="0.480" data-y="0.273" aria-label="Pilatus, 2,128 meters">
+            <span class="summit-label"><span class="summit-name">Pilatus</span><span class="summit-height">2,128 m</span></span>
+            <span class="summit-line"></span>
+          </button>
+          <button type="button" class="summit" data-x="0.815" data-y="0.222" aria-label="Matterhorn, 4,478 meters">
+            <span class="summit-label"><span class="summit-name">Matterhorn</span><span class="summit-height">4,478 m</span></span>
+            <span class="summit-line"></span>
+          </button>
+        </div>
+        <div class="flash" hidden></div>
+        <button type="button" class="advance" hidden>Explore the Range</button>
+        <button type="button" class="step step-prev" hidden aria-label="Previous mountain">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button type="button" class="step step-next" hidden aria-label="Next mountain">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </main>
+    <script src="scrub.js"></script>
+    <script>
+      const trialPin = document.querySelector(".trial-pin");
+      const trialLayers = trialPin.querySelectorAll(".start-still, .hero-video, .end-still");
+      const trialNext = document.querySelector(".next");
+      const trialTrack = document.querySelector(".scrub");
+      const openingBoy = 0.5159;
+      const openingScale = 1 / (1 - 2 * Math.abs(openingBoy - 0.5));
+
+      const placeTrial = () => {
+        const max = Math.max(0, trialTrack.offsetHeight - window.innerHeight);
+        const progress = max ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        const hold = 1 - progress;
+        const scale = 1 + (openingScale - 1) * hold;
+        const shift = -(openingBoy - 0.5) * trialPin.clientWidth * scale * hold;
+        const transform = `translate3d(${shift}px, 0, 0) scale(${scale})`;
+        trialLayers.forEach((layer) => {
+          layer.style.transform = transform;
+        });
+        if (trialNext) trialNext.style.left = `${trialPin.clientWidth / 2}px`;
+      };
+
+      const placeTrialAfter = () => requestAnimationFrame(placeTrial);
+      window.addEventListener("scroll", placeTrialAfter, { passive: true });
+      window.addEventListener("resize", placeTrialAfter);
+      window.addEventListener("load", placeTrialAfter);
+      const trialEnd = trialPin.querySelector(".end-still");
+      if (trialEnd) trialEnd.addEventListener("load", placeTrialAfter);
+      placeTrialAfter();
+    </script>
+  </body>
+</html>

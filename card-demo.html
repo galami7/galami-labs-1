@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Final card demo</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: #2f6eb8;
+      }
+
+      .frame {
+        --frame: max(100vw, calc(100dvh * 16 / 9));
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: var(--frame);
+        height: calc(var(--frame) * 9 / 16);
+        transform: translate(-50%, -50%);
+        overflow: hidden;
+      }
+
+      .frame img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <img src="Mountain Peak 3.0.jpg" alt="The boy standing on a snowy summit, with a smaller peak beyond" />
+      <div class="contact-card">
+        <p class="contact-kicker">Thanks for the visit!</p>
+        <h2 class="contact-title">Join the Expedition</h2>
+        <form class="contact-email" action="#">
+          <label for="expedition-email">Email</label>
+          <div class="contact-email-row">
+            <span class="contact-email-field">
+              <input id="expedition-email" type="email" name="email" placeholder="Your email" />
+            </span>
+            <button type="submit">Join</button>
+          </div>
+        </form>
+      </div>
+      <a class="next-peak" href="https://www.guillaumegruyters.com/" target="_blank" rel="noreferrer" aria-label="Want to explore more? guillaumegruyters.com">
+        <span class="next-peak-label">
+          <span class="next-peak-copy">
+            <span class="next-peak-name">Want to explore more?</span>
+            <span class="next-peak-meta">click here</span>
+          </span>
+          <span class="next-peak-site">guillaumegruyters.com</span>
+        </span>
+        <span class="next-peak-line"></span>
+      </a>
+    </div>
+    <script>
+      document.querySelector(".contact-email").addEventListener("submit", (event) => event.preventDefault());
+    </script>
+  </body>
+</html>
