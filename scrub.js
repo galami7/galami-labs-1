@@ -277,9 +277,7 @@ const loadBar = document.querySelector(".phone-load-bar");
 
 const setLoadProgress = (amount) => {
   const t = Math.min(1, Math.max(0, amount));
-  const root = document.documentElement;
-  root.style.setProperty("--load-blur", `${(1 - t) * 18}px`);
-  root.style.setProperty("--load-scale", `${1 + (1 - t) * 0.06}`);
+  document.documentElement.style.setProperty("--load-blur", `${(1 - t) * 18}px`);
   if (loadBar) loadBar.style.width = `${Math.round(t * 100)}%`;
 };
 

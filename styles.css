@@ -964,8 +964,8 @@ body {
 
   html.is-video-loading .start-still {
     filter: blur(var(--load-blur, 18px));
-    transform: scale(var(--load-scale, 1.06));
-    transition: filter 0.35s linear, transform 0.35s linear;
+    transform: scale(1.05);
+    transition: filter 0.4s linear;
   }
 
   html.is-video-loading .pin.is-away .start-still {
