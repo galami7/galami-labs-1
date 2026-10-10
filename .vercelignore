@@ -12,3 +12,5 @@
 !*.mp4
 !*.woff
 !*.woff2
+!slide-mobile-1.0/
+!slide-mobile-1.0/**
