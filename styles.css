@@ -964,17 +964,20 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100dvh;
+    height: 100lvh;
   }
 
-  .pin img,
-  .pin video {
-    object-fit: cover;
+  .pin .start-still,
+  .pin .hero-video,
+  .pin .end-still {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
     object-position: center center;
   }
 
   .wordmark {
-    top: max(14vh, env(safe-area-inset-top));
+    top: max(14vh, calc(var(--chrome-top, env(safe-area-inset-top)) + 0.85rem));
     left: 0;
     right: 0;
     padding: 0;
@@ -985,8 +988,12 @@ body {
   }
 
   .statement {
-    top: calc(4.6vh + env(safe-area-inset-top));
+    top: max(4.6vh, calc(var(--chrome-top, env(safe-area-inset-top)) + 0.35rem));
     padding: 0 1rem;
+  }
+
+  .advance {
+    bottom: calc(1.7rem + var(--chrome-bottom, env(safe-area-inset-bottom)));
   }
 
   .statement-title {

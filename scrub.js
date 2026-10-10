@@ -17,6 +17,20 @@ const progress = () => {
   return distance > 0 ? Math.min(1, Math.max(0, window.scrollY / distance)) : 0;
 };
 
+const readPhoneLength = (value) => {
+  let probe = document.getElementById("phone-screen-probe");
+  if (!probe) {
+    probe = document.createElement("div");
+    probe.id = "phone-screen-probe";
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.cssText = "position:fixed;left:0;width:0;pointer-events:none;visibility:hidden;";
+    document.documentElement.appendChild(probe);
+  }
+  probe.style.top = "0px";
+  probe.style.height = value;
+  return probe.getBoundingClientRect().height;
+};
+
 const fitPhonePin = () => {
   if (!isPhone()) {
     pin.style.position = "";
@@ -24,16 +38,27 @@ const fitPhonePin = () => {
     pin.style.left = "";
     pin.style.width = "";
     pin.style.height = "";
+    pin.style.removeProperty("--chrome-top");
+    pin.style.removeProperty("--chrome-bottom");
     return;
   }
   const viewport = window.visualViewport;
-  const height = viewport ? viewport.height : window.innerHeight;
-  const top = viewport ? viewport.offsetTop : 0;
+  const visibleTop = viewport ? viewport.offsetTop : 0;
+  const visibleHeight = viewport ? viewport.height : window.innerHeight;
+  const safeTop = readPhoneLength("env(safe-area-inset-top)");
+  const safeBottom = readPhoneLength("env(safe-area-inset-bottom)");
+  const full = Math.max(
+    readPhoneLength("100lvh"),
+    visibleTop + visibleHeight,
+    safeTop + visibleHeight + safeBottom
+  );
   pin.style.position = "fixed";
-  pin.style.top = `${top}px`;
+  pin.style.top = "0px";
   pin.style.left = "0px";
   pin.style.width = "100%";
-  pin.style.height = `${Math.round(height)}px`;
+  pin.style.height = `${Math.round(full)}px`;
+  pin.style.setProperty("--chrome-top", `${Math.round(Math.max(safeTop, visibleTop))}px`);
+  pin.style.setProperty("--chrome-bottom", `${Math.round(Math.max(safeBottom, full - visibleTop - visibleHeight))}px`);
 };
 
 const updateChrome = () => {
@@ -373,16 +398,19 @@ const placeSummits = () => {
   if (!summitLayer || !endStill.naturalWidth) return;
   const viewW = pin.clientWidth;
   const viewH = pin.clientHeight;
-  const scale = Math.max(viewW / endStill.naturalWidth, viewH / endStill.naturalHeight);
-  const offsetX = (viewW - endStill.naturalWidth * scale) / 2;
-  const offsetY = (viewH - endStill.naturalHeight * scale) / 2;
+  const stretched = isPhone();
+  const scale = stretched ? 1 : Math.max(viewW / endStill.naturalWidth, viewH / endStill.naturalHeight);
+  const drawnW = stretched ? viewW : endStill.naturalWidth * scale;
+  const drawnH = stretched ? viewH : endStill.naturalHeight * scale;
+  const offsetX = (viewW - drawnW) / 2;
+  const offsetY = (viewH - drawnH) / 2;
   const markerX = (marker) => Number(isPhone() && marker.dataset.phoneX ? marker.dataset.phoneX : marker.dataset.x);
   const markerY = (marker) => Number(isPhone() && marker.dataset.phoneY ? marker.dataset.phoneY : marker.dataset.y);
   summitLayer.querySelectorAll(".summit").forEach((marker) => {
-    marker.style.left = `${offsetX + markerX(marker) * endStill.naturalWidth * scale}px`;
-    marker.style.top = `${offsetY + markerY(marker) * endStill.naturalHeight * scale}px`;
+    marker.style.left = `${offsetX + markerX(marker) * drawnW}px`;
+    marker.style.top = `${offsetY + markerY(marker) * drawnH}px`;
   });
-  const along = (nx) => `${offsetX + nx * endStill.naturalWidth * scale}px`;
+  const along = (nx) => `${offsetX + nx * drawnW}px`;
   if (nextButton) nextButton.style.left = along(isPhone() ? 0.5 : 0.516);
   const advanceButton = document.querySelector(".advance");
   if (advanceButton) advanceButton.style.left = along(isPhone() ? 0.5 : 0.496);
