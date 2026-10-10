@@ -1,5 +1,4 @@
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-window.scrollTo(0, 0);
 
 const video = document.querySelector(".hero-video");
 const track = document.querySelector(".scrub");
@@ -10,11 +9,19 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const phoneQuery = window.matchMedia("(max-aspect-ratio: 4/5)");
 const isPhone = () => phoneQuery.matches;
 
-const maxScroll = () => Math.max(0, track.offsetHeight - window.innerHeight);
+const runway = () => isPhone() ? readPhoneLength("var(--safari-scroll-offset)") : 0;
+const scrubDistance = () => Math.max(0, track.offsetHeight - window.innerHeight);
+const maxScroll = () => runway() + scrubDistance();
 
 const progress = () => {
-  const distance = maxScroll();
-  return distance > 0 ? Math.min(1, Math.max(0, window.scrollY / distance)) : 0;
+  const distance = scrubDistance();
+  if (distance <= 0) return 0;
+  return Math.min(1, Math.max(0, (window.scrollY - runway()) / distance));
+};
+
+const parkAtStart = () => {
+  const offset = runway();
+  if (window.scrollY < offset) window.scrollTo(0, offset);
 };
 
 const readPhoneLength = (value) => {
@@ -32,35 +39,14 @@ const readPhoneLength = (value) => {
 };
 
 const fitPhonePin = () => {
-  if (!isPhone()) {
-    pin.style.position = "";
-    pin.style.top = "";
-    pin.style.left = "";
-    pin.style.width = "";
-    pin.style.height = "";
-    pin.style.removeProperty("--chrome-top");
-    pin.style.removeProperty("--chrome-bottom");
-    return;
-  }
-  const viewport = window.visualViewport;
-  const visibleHeight = viewport ? viewport.height : window.innerHeight;
-  const safeTop = readPhoneLength("env(safe-area-inset-top)");
-  const safeBottom = readPhoneLength("env(safe-area-inset-bottom)");
-  const screenHeight = Math.round(Math.max(window.screen.height, visibleHeight, readPhoneLength("100lvh")));
-  const extra = Math.max(0, screenHeight - visibleHeight);
-  // The camera area is already inside the page when the safe inset is reported.
-  // Otherwise the picture has to start above the layout so it sits behind the camera.
-  const topChrome = safeTop > 1 ? 0 : Math.min(59, extra);
-  const top = safeTop > 1 ? 0 : -topChrome;
-  pin.style.position = "fixed";
-  pin.style.top = `${Math.round(top)}px`;
-  pin.style.left = "0px";
-  pin.style.width = "100%";
-  pin.style.height = `${screenHeight}px`;
-  const textTop = Math.max(safeTop, topChrome);
-  const textBottom = Math.max(safeBottom, top + screenHeight - visibleHeight);
-  pin.style.setProperty("--chrome-top", `${Math.round(textTop)}px`);
-  pin.style.setProperty("--chrome-bottom", `${Math.round(textBottom)}px`);
+  pin.style.position = "";
+  pin.style.top = "";
+  pin.style.left = "";
+  pin.style.width = "";
+  pin.style.height = "";
+  pin.style.removeProperty("--chrome-top");
+  pin.style.removeProperty("--chrome-bottom");
+  parkAtStart();
 };
 
 const updateChrome = () => {
@@ -176,7 +162,7 @@ const playHands = () => {
       video.playbackRate = targetRate;
     }
     const amount = Math.min(1, video.currentTime / duration);
-    window.scrollTo(0, scrollProgressForVideo(amount) * maxScroll());
+    window.scrollTo(0, runway() + scrollProgressForVideo(amount) * scrubDistance());
 
     if (video.ended || amount >= 0.995) {
       driving = false;
@@ -280,6 +266,7 @@ const setLoadProgress = (amount) => {
 const finishPhoneLoad = () => {
   document.documentElement.classList.remove("is-video-loading");
   document.documentElement.classList.add("is-video-ready");
+  parkAtStart();
 };
 
 let phoneBlobUrl = "";
@@ -465,11 +452,13 @@ const placeSummits = () => {
   const viewW = pin.clientWidth;
   const viewH = pin.clientHeight;
   const stretched = isPhone();
+  const topBleed = stretched ? readPhoneLength("var(--safari-top-bleed)") : 0;
+  const bottomBleed = stretched ? readPhoneLength("var(--safari-bottom-bleed)") : 0;
   const scale = stretched ? 1 : Math.max(viewW / endStill.naturalWidth, viewH / endStill.naturalHeight);
   const drawnW = stretched ? viewW : endStill.naturalWidth * scale;
-  const drawnH = stretched ? viewH : endStill.naturalHeight * scale;
+  const drawnH = stretched ? viewH + topBleed + bottomBleed : endStill.naturalHeight * scale;
   const offsetX = (viewW - drawnW) / 2;
-  const offsetY = (viewH - drawnH) / 2;
+  const offsetY = stretched ? -topBleed : (viewH - drawnH) / 2;
   const markerX = (marker) => Number(isPhone() && marker.dataset.phoneX ? marker.dataset.phoneX : marker.dataset.x);
   const markerY = (marker) => Number(isPhone() && marker.dataset.phoneY ? marker.dataset.phoneY : marker.dataset.y);
   summitLayer.querySelectorAll(".summit").forEach((marker) => {

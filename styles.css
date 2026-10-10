@@ -955,16 +955,21 @@ body {
 }
 
 @media (max-aspect-ratio: 4/5) {
-  html,
-  body,
-  .pin {
-    background: transparent;
+  :root {
+    --safari-top-bleed: max(62px, env(safe-area-inset-top, 0px));
+    --safari-bottom-bleed: max(136px, calc(env(safe-area-inset-bottom, 0px) + 84px));
+    --safari-scroll-offset: var(--safari-top-bleed);
   }
 
-  html.is-video-loading,
-  html.is-video-loading body {
-    overflow: hidden;
-    height: 100%;
+  html,
+  body {
+    background: var(--sky);
+    overflow-y: scroll;
+    overscroll-behavior: none;
+  }
+
+  .scrub {
+    margin-top: var(--safari-scroll-offset);
   }
 
   html.is-video-loading .phone-load {
@@ -1015,20 +1020,22 @@ body {
   }
 
   .pin {
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100lvh;
-    min-height: 100vh;
+    height: 100dvh;
     background: transparent;
+    overflow: visible;
   }
 
   .pin .start-still,
   .pin .hero-video,
   .pin .end-still {
+    top: calc(-1 * var(--safari-top-bleed));
+    right: 0;
+    bottom: auto;
+    left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% + var(--safari-top-bleed) + var(--safari-bottom-bleed));
     object-fit: fill;
     object-position: center center;
   }
