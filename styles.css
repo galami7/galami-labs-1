@@ -955,10 +955,12 @@ body {
 }
 
 @media (max-aspect-ratio: 4/5) {
-  html,
-  body {
-    background: var(--sky);
+  html {
     overflow-y: scroll;
+    overscroll-behavior: none;
+  }
+
+  body {
     overscroll-behavior: none;
   }
 
