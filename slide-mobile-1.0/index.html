@@ -121,7 +121,7 @@
         position: absolute;
         top: 12%;
         left: calc(50% - 50vw + 1.1rem);
-        width: min(13rem, 48vw);
+        width: min(12rem, 42vw);
         text-align: left;
         pointer-events: none;
       }
@@ -186,35 +186,33 @@
 
       .next-peak {
         position: absolute;
-        left: 28%;
-        top: 78%;
+        left: calc((var(--frame) - 100vw) / 2 + 1.35rem);
+        top: 64%;
         width: 1.4rem;
         height: 1.4rem;
         color: #fff;
         text-decoration: none;
         text-shadow: 0 1px 8px rgba(8, 28, 64, 0.45);
-        transform: translate(-50%, -50%);
+        transform: translateY(-50%);
         pointer-events: auto;
       }
 
       .next-peak-line {
         position: absolute;
-        left: 50%;
+        left: 0.7rem;
         bottom: 50%;
         width: 1px;
-        height: 2.8rem;
+        height: 2.6rem;
         background: rgba(255, 255, 255, 0.92);
-        transform: translateX(-50%);
       }
 
       .next-peak-label {
         position: absolute;
-        left: 50%;
-        bottom: calc(50% + 3rem);
+        left: 0;
+        bottom: calc(50% + 2.85rem);
         width: max-content;
-        max-width: 70vw;
-        transform: translateX(-50%);
-        text-align: center;
+        max-width: 58vw;
+        text-align: left;
         font-family: system-ui, sans-serif;
       }
 
