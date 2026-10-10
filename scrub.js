@@ -240,6 +240,17 @@ const playToEnd = () => {
 };
 
 nextButton.addEventListener("click", playToEnd);
+window.addEventListener("touchstart", () => {
+  if (!video || video.readyState < 2) return;
+  const started = video.play();
+  const unlock = () => {
+    video.pause();
+    frame = -1;
+    requestSeek();
+  };
+  if (started && typeof started.then === "function") started.then(unlock).catch(unlock);
+  else unlock();
+}, { once: true, passive: true });
 window.addEventListener("wheel", () => {
   if (playing) stopPlayback();
 }, { passive: true });
@@ -253,9 +264,74 @@ let activeSource = "";
 
 const scrubSource = () => (
   isPhone()
-    ? (video.dataset.phoneScrub || "iPhone Video 1.0.mp4")
+    ? (video.dataset.phoneScrub || "iphone-scrub.mp4")
     : (video.dataset.scrub || "scrub.mp4")
 );
+
+const loadBar = document.querySelector(".phone-load-bar");
+
+const setLoadProgress = (amount) => {
+  if (!loadBar) return;
+  loadBar.style.width = `${Math.round(Math.min(1, Math.max(0, amount)) * 100)}%`;
+};
+
+const finishPhoneLoad = () => {
+  document.documentElement.classList.remove("is-video-loading");
+  document.documentElement.classList.add("is-video-ready");
+};
+
+const videoCanScrub = () => {
+  const duration = video.duration;
+  if (!Number.isFinite(duration) || duration <= 0 || video.seekable.length === 0) return false;
+  return video.seekable.end(video.seekable.length - 1) >= duration - 0.3;
+};
+
+const waitUntilScrubbable = () => new Promise((resolve) => {
+  const started = performance.now();
+  const tick = () => {
+    if (videoCanScrub() || performance.now() - started > 8000) {
+      resolve();
+      return;
+    }
+    requestAnimationFrame(tick);
+  };
+  tick();
+});
+
+let phoneBlobUrl = "";
+
+const loadEntireVideo = async (source) => {
+  try {
+    const response = await fetch(source);
+    if (!response.ok || !response.body) throw new Error("missing video");
+    const length = Number(response.headers.get("content-length")) || 0;
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.byteLength;
+      if (length) setLoadProgress(received / length);
+    }
+    setLoadProgress(1);
+    if (phoneBlobUrl) URL.revokeObjectURL(phoneBlobUrl);
+    phoneBlobUrl = URL.createObjectURL(new Blob(chunks, { type: "video/mp4" }));
+    await new Promise((resolve, reject) => {
+      video.addEventListener("loadeddata", resolve, { once: true });
+      video.addEventListener("error", () => reject(new Error("decode")), { once: true });
+      video.src = phoneBlobUrl;
+    });
+    await waitUntilScrubbable();
+    frame = -1;
+    requestSeek();
+    finishPhoneLoad();
+  } catch (error) {
+    video.src = source;
+    finishPhoneLoad();
+  }
+};
 
 const enableVideo = () => {
   if (reduceMotion.matches || !video) return;
@@ -296,8 +372,14 @@ const enableVideo = () => {
   frame = -1;
   video.preload = "auto";
   video.poster = isPhone() ? "Mobile First Frame.jpg" : "trial-first.jpg";
+  if (isPhone()) {
+    loadEntireVideo(source);
+    return;
+  }
   video.src = source;
 };
+
+if (reduceMotion.matches) finishPhoneLoad();
 
 fitPhonePin();
 if (!reduceMotion.matches) enableVideo();

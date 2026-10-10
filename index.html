@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles.css" />
     <script>
       if (matchMedia("(max-aspect-ratio: 4/5)").matches) {
-        document.documentElement.classList.add("is-phone");
+        document.documentElement.classList.add("is-phone", "is-video-loading");
       }
     </script>
     <style>
@@ -60,6 +60,10 @@
     </style>
   </head>
   <body>
+    <div class="phone-load">
+      <p class="phone-load-mark">Galami Labs</p>
+      <div class="phone-load-track"><span class="phone-load-bar"></span></div>
+    </div>
     <main class="scrub">
       <div class="pin home">
         <picture>
@@ -82,7 +86,7 @@
           disablepictureinpicture
           disableremoteplayback
           data-scrub="scrub-trial.mp4"
-          data-phone-scrub="iPhone Video 1.0.mp4"
+          data-phone-scrub="iphone-scrub.mp4"
         ></video>
         <picture>
           <source media="(max-aspect-ratio: 4/5)" srcset="Mobile%20Middle%20Frame%201.0.jpg" />
