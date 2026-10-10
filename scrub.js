@@ -269,6 +269,7 @@ const prevStep = document.querySelector(".step-prev");
 const nextStep = document.querySelector(".step-next");
 const summitLayer = document.querySelector(".summits");
 const peakExit = document.querySelector(".peak-exit");
+const moreFog = document.querySelector(".more-fog");
 const peakReadout = document.querySelector(".peak-readout");
 const peakHeights = ["1,798 m", "2,128 m", "4,478 m"];
 const heightDigits = [
@@ -371,7 +372,18 @@ function syncPeaks() {
   advance.hidden = open || !atEnd;
   if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
   if (nextStep) nextStep.hidden = !open || peakIndex >= peakCount - 1;
-  if (peakExit) peakExit.hidden = !open;
+  if (peakExit) {
+    const onFinal = open && peakIndex === peakCount - 1;
+    const menuOpen = onFinal && moreFog && !moreFog.hidden;
+    peakExit.hidden = !open;
+    peakExit.classList.toggle("is-more", onFinal);
+    peakExit.setAttribute("aria-label", onFinal ? (menuOpen ? "Close" : "More") : "Back to the mountains");
+    if (onFinal) peakExit.setAttribute("aria-expanded", menuOpen ? "true" : "false");
+    else peakExit.removeAttribute("aria-expanded");
+    if (!onFinal && moreFog && !moreFog.hidden) {
+      moreFog.hidden = true;
+    }
+  }
   if (peakReadout) {
     const index = Math.min(peakIndex, 2);
     const showReadout = open && peakIndex < 3;
@@ -476,7 +488,18 @@ if (peaks && advance && prevStep && nextStep) {
   }, { passive: true });
   prevStep.addEventListener("click", () => showPeak(peakIndex - 1, true));
   nextStep.addEventListener("click", () => showPeak(peakIndex + 1, true));
+  const closeMore = () => {
+    if (!moreFog || moreFog.hidden) return;
+    moreFog.hidden = true;
+    syncPeaks();
+  };
+  const openMore = () => {
+    if (!moreFog) return;
+    moreFog.hidden = false;
+    syncPeaks();
+  };
   const closePeaks = () => {
+    if (moreFog) moreFog.hidden = true;
     pin.classList.remove("is-peaks");
     peaks.hidden = true;
     cancelAnimationFrame(peakFrame);
@@ -486,9 +509,26 @@ if (peaks && advance && prevStep && nextStep) {
     peaks.style.setProperty("--peak", "0");
     syncPeaks();
   };
-  if (peakExit) peakExit.addEventListener("click", closePeaks);
+  if (peakExit) {
+    peakExit.addEventListener("click", () => {
+      if (peakExit.classList.contains("is-more")) {
+        if (moreFog && moreFog.hidden) openMore();
+        else closeMore();
+        return;
+      }
+      closePeaks();
+    });
+  }
+  if (moreFog) {
+    moreFog.addEventListener("click", (event) => {
+      if (event.target.closest("a")) return;
+      closeMore();
+    });
+  }
   window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && pin.classList.contains("is-peaks")) closePeaks();
+    if (event.key !== "Escape" || !pin.classList.contains("is-peaks")) return;
+    if (moreFog && !moreFog.hidden) closeMore();
+    else closePeaks();
   });
   const keepPeaks = (event) => {
     if (pin.classList.contains("is-peaks")) event.preventDefault();

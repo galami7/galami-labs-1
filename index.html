@@ -131,14 +131,6 @@
                     <p class="contact-status" hidden></p>
                   </form>
                 </div>
-                <div class="contact-close">
-                  <p class="contact-sign">Galami Labs by Guillaume Gruyters.</p>
-                  <p class="contact-touch">
-                    <a href="mailto:guillaume.gruyters@gmail.com">Email</a>
-                    <span aria-hidden="true">·</span>
-                    <a href="https://www.linkedin.com/in/guillaume-gruyters/" target="_blank" rel="noreferrer">LinkedIn</a>
-                  </p>
-                </div>
               </div>
               <a class="next-peak" href="https://www.guillaumegruyters.com/" target="_blank" rel="noreferrer" aria-label="Want to explore more? guillaumegruyters.com">
                 <span class="next-peak-label">
@@ -192,10 +184,21 @@
           </svg>
         </button>
         <button type="button" class="peak-exit" hidden aria-label="Back to the mountains">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <svg class="peak-exit-mark" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
           </svg>
+          <svg class="peak-more-mark" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4.5 7h15M4.5 12h15M4.5 17h15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
         </button>
+        <div class="more-fog" hidden>
+          <nav class="more-links" aria-label="Contact">
+            <a href="mailto:guillaume.gruyters@gmail.com">Email</a>
+            <a href="https://www.linkedin.com/in/guillaume-gruyters/" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a href="https://www.guillaumegruyters.com/" target="_blank" rel="noreferrer">Personal website</a>
+          </nav>
+          <p class="more-sign">Galami Labs by Guillaume Gruyters.</p>
+        </div>
         <button type="button" class="step step-next" hidden aria-label="Next mountain">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />

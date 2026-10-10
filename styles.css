@@ -830,7 +830,7 @@ body {
 
 .peak-exit {
   position: absolute;
-  z-index: 7;
+  z-index: 9;
   top: calc(1.05rem + env(safe-area-inset-top));
   right: calc(1.05rem + env(safe-area-inset-right));
   display: grid;
@@ -854,6 +854,74 @@ body {
 .peak-exit svg {
   width: 1.45rem;
   height: 1.45rem;
+}
+
+.peak-exit .peak-more-mark {
+  display: none;
+}
+
+.peak-exit.is-more .peak-exit-mark {
+  display: none;
+}
+
+.peak-exit.is-more .peak-more-mark {
+  display: block;
+}
+
+.more-fog {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 32, 58, 0.42);
+  color: #fff;
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  animation: more-fog-in 0.28s ease;
+}
+
+.more-fog[hidden] {
+  display: none;
+}
+
+@keyframes more-fog-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.more-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.95rem;
+}
+
+.more-links a {
+  color: inherit;
+  text-decoration: none;
+  font: 500 clamp(2.6rem, 6.6vw, 4.6rem)/0.95 system-ui, sans-serif;
+  letter-spacing: -0.045em;
+  text-shadow: 0 1px 16px rgba(8, 28, 64, 0.28);
+}
+
+.more-links a:hover,
+.more-links a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.16em;
+}
+
+.more-sign {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: calc(1.7rem + env(safe-area-inset-bottom));
+  margin: 0;
+  text-align: center;
+  font: 500 0.98rem/1.35 system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 10px rgba(8, 28, 64, 0.28);
 }
 
 .advance[hidden],
@@ -1088,6 +1156,7 @@ body {
   .height-reel,
   .step,
   .peak-exit,
+  .more-fog,
   .contact-email button,
   .contact-email-field::before,
   .next-peak-copy,
