@@ -9,14 +9,25 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const phoneQuery = window.matchMedia("(max-aspect-ratio: 4/5)");
 const isPhone = () => phoneQuery.matches;
 
-const runway = () => isPhone() ? readPhoneLength("var(--safari-scroll-offset)") : 0;
-const scrubDistance = () => Math.max(0, track.offsetHeight - window.innerHeight);
-const maxScroll = () => runway() + scrubDistance();
+const phoneBand = () => {
+  if (!isPhone()) return { top: 0, bottom: 0 };
+  return { top: 24, bottom: 24 };
+};
+
+const endScroll = () => {
+  const span = isPhone() ? pin.offsetHeight : window.innerHeight;
+  const end = Math.max(0, track.offsetHeight - span);
+  return isPhone() ? Math.max(0, end - 1) : end;
+};
+
+const runway = () => (isPhone() ? Math.min(phoneBand().top, endScroll()) : 0);
+const maxScroll = () => endScroll();
 
 const progress = () => {
-  const distance = scrubDistance();
+  const start = runway();
+  const distance = maxScroll() - start;
   if (distance <= 0) return 0;
-  return Math.min(1, Math.max(0, (window.scrollY - runway()) / distance));
+  return Math.min(1, Math.max(0, (window.scrollY - start) / distance));
 };
 
 const parkAtStart = () => {
@@ -24,28 +35,33 @@ const parkAtStart = () => {
   if (window.scrollY < offset) window.scrollTo(0, offset);
 };
 
-const readPhoneLength = (value) => {
-  let probe = document.getElementById("phone-screen-probe");
-  if (!probe) {
-    probe = document.createElement("div");
-    probe.id = "phone-screen-probe";
-    probe.setAttribute("aria-hidden", "true");
-    probe.style.cssText = "position:fixed;left:0;width:0;pointer-events:none;visibility:hidden;";
-    document.documentElement.appendChild(probe);
-  }
-  probe.style.top = "0px";
-  probe.style.height = value;
-  return probe.getBoundingClientRect().height;
-};
-
 const fitPhonePin = () => {
-  pin.style.position = "";
-  pin.style.top = "";
-  pin.style.left = "";
-  pin.style.width = "";
-  pin.style.height = "";
-  pin.style.removeProperty("--chrome-top");
-  pin.style.removeProperty("--chrome-bottom");
+  if (!isPhone()) {
+    pin.style.position = "";
+    pin.style.top = "";
+    pin.style.left = "";
+    pin.style.width = "";
+    pin.style.height = "";
+    pin.style.removeProperty("--band-top");
+    pin.style.removeProperty("--band-bottom");
+    pin.style.removeProperty("--chrome-top");
+    pin.style.removeProperty("--chrome-bottom");
+    return;
+  }
+
+  const band = phoneBand();
+  const viewport = window.visualViewport;
+  const topBar = viewport ? viewport.offsetTop : 0;
+  const bottomBar = viewport ? Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height) : 0;
+  pin.style.position = "sticky";
+  pin.style.top = `${-band.top}px`;
+  pin.style.left = "0";
+  pin.style.width = "100%";
+  pin.style.height = `${window.innerHeight + band.top + band.bottom}px`;
+  pin.style.setProperty("--band-top", `${band.top}px`);
+  pin.style.setProperty("--band-bottom", `${band.bottom}px`);
+  pin.style.setProperty("--chrome-top", `${band.top + topBar}px`);
+  pin.style.setProperty("--chrome-bottom", `${band.bottom + bottomBar}px`);
   parkAtStart();
 };
 
@@ -162,7 +178,8 @@ const playHands = () => {
       video.playbackRate = targetRate;
     }
     const amount = Math.min(1, video.currentTime / duration);
-    window.scrollTo(0, runway() + scrollProgressForVideo(amount) * scrubDistance());
+    const travel = Math.max(0, maxScroll() - runway());
+    window.scrollTo(0, runway() + scrollProgressForVideo(amount) * travel);
 
     if (video.ended || amount >= 0.995) {
       driving = false;
@@ -259,8 +276,11 @@ const scrubSource = () => (
 const loadBar = document.querySelector(".phone-load-bar");
 
 const setLoadProgress = (amount) => {
-  if (!loadBar) return;
-  loadBar.style.width = `${Math.round(Math.min(1, Math.max(0, amount)) * 100)}%`;
+  const t = Math.min(1, Math.max(0, amount));
+  const root = document.documentElement;
+  root.style.setProperty("--load-blur", `${(1 - t) * 18}px`);
+  root.style.setProperty("--load-scale", `${1 + (1 - t) * 0.06}`);
+  if (loadBar) loadBar.style.width = `${Math.round(t * 100)}%`;
 };
 
 const finishPhoneLoad = () => {
@@ -273,6 +293,7 @@ let phoneBlobUrl = "";
 
 const loadEntireVideo = async (source) => {
   const openPage = () => finishPhoneLoad();
+  setLoadProgress(0);
   const giveUp = window.setTimeout(openPage, 12000);
   try {
     const response = await fetch(source);
@@ -342,6 +363,9 @@ const enableVideo = () => {
   activeSource = source;
   frame = -1;
   video.preload = "auto";
+  video.playsInline = true;
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
   video.poster = isPhone() ? "Mobile First Frame.jpg" : "trial-first.jpg";
   if (isPhone()) {
     loadEntireVideo(source);
@@ -451,14 +475,11 @@ const placeSummits = () => {
   if (!summitLayer || !endStill.naturalWidth) return;
   const viewW = pin.clientWidth;
   const viewH = pin.clientHeight;
-  const stretched = isPhone();
-  const topBleed = stretched ? readPhoneLength("var(--safari-top-bleed)") : 0;
-  const bottomBleed = stretched ? readPhoneLength("var(--safari-bottom-bleed)") : 0;
-  const scale = stretched ? 1 : Math.max(viewW / endStill.naturalWidth, viewH / endStill.naturalHeight);
-  const drawnW = stretched ? viewW : endStill.naturalWidth * scale;
-  const drawnH = stretched ? viewH + topBleed + bottomBleed : endStill.naturalHeight * scale;
+  const scale = Math.max(viewW / endStill.naturalWidth, viewH / endStill.naturalHeight);
+  const drawnW = endStill.naturalWidth * scale;
+  const drawnH = endStill.naturalHeight * scale;
   const offsetX = (viewW - drawnW) / 2;
-  const offsetY = stretched ? -topBleed : (viewH - drawnH) / 2;
+  const offsetY = (viewH - drawnH) / 2;
   const markerX = (marker) => Number(isPhone() && marker.dataset.phoneX ? marker.dataset.phoneX : marker.dataset.x);
   const markerY = (marker) => Number(isPhone() && marker.dataset.phoneY ? marker.dataset.phoneY : marker.dataset.y);
   summitLayer.querySelectorAll(".summit").forEach((marker) => {
