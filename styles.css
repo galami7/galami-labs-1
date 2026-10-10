@@ -955,6 +955,12 @@ body {
 }
 
 @media (max-aspect-ratio: 4/5) {
+  html,
+  body,
+  .pin {
+    background: transparent;
+  }
+
   html.is-video-loading,
   html.is-video-loading body {
     overflow: hidden;
@@ -1014,6 +1020,8 @@ body {
     left: 0;
     width: 100%;
     height: 100lvh;
+    min-height: 100vh;
+    background: transparent;
   }
 
   .pin .start-still,

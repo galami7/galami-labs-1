@@ -43,22 +43,24 @@ const fitPhonePin = () => {
     return;
   }
   const viewport = window.visualViewport;
-  const visibleTop = viewport ? viewport.offsetTop : 0;
   const visibleHeight = viewport ? viewport.height : window.innerHeight;
   const safeTop = readPhoneLength("env(safe-area-inset-top)");
   const safeBottom = readPhoneLength("env(safe-area-inset-bottom)");
-  const full = Math.max(
-    readPhoneLength("100lvh"),
-    visibleTop + visibleHeight,
-    safeTop + visibleHeight + safeBottom
-  );
+  const screenHeight = Math.round(Math.max(window.screen.height, visibleHeight, readPhoneLength("100lvh")));
+  const extra = Math.max(0, screenHeight - visibleHeight);
+  // The camera area is already inside the page when the safe inset is reported.
+  // Otherwise the picture has to start above the layout so it sits behind the camera.
+  const topChrome = safeTop > 1 ? 0 : Math.min(59, extra);
+  const top = safeTop > 1 ? 0 : -topChrome;
   pin.style.position = "fixed";
-  pin.style.top = "0px";
+  pin.style.top = `${Math.round(top)}px`;
   pin.style.left = "0px";
   pin.style.width = "100%";
-  pin.style.height = `${Math.round(full)}px`;
-  pin.style.setProperty("--chrome-top", `${Math.round(Math.max(safeTop, visibleTop))}px`);
-  pin.style.setProperty("--chrome-bottom", `${Math.round(Math.max(safeBottom, full - visibleTop - visibleHeight))}px`);
+  pin.style.height = `${screenHeight}px`;
+  const textTop = Math.max(safeTop, topChrome);
+  const textBottom = Math.max(safeBottom, top + screenHeight - visibleHeight);
+  pin.style.setProperty("--chrome-top", `${Math.round(textTop)}px`);
+  pin.style.setProperty("--chrome-bottom", `${Math.round(textBottom)}px`);
 };
 
 const updateChrome = () => {
