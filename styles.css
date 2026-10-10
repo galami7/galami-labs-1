@@ -363,8 +363,8 @@ body {
 
 .contact-card {
   position: absolute;
-  top: 24%;
-  left: 8%;
+  top: 28%;
+  left: 12%;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -1076,8 +1076,8 @@ body {
   }
 
   .contact-card {
-    top: 13%;
-    left: calc(50% - 50cqi + 1.15rem);
+    top: 17%;
+    left: calc(50% - 50cqi + 1.85rem);
     width: min(12.25rem, 50vw);
     height: auto;
     justify-content: flex-start;
