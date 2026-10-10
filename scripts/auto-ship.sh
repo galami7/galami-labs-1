@@ -6,8 +6,51 @@ set -u
 REPO="/Users/guillaumeg/Galami Labs"
 cd "$REPO" || exit 0
 
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH="/Users/guillaumeg/.npm-global/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export HOME="${HOME:-/Users/guillaumeg}"
+VERCEL="/Users/guillaumeg/.npm-global/bin/vercel"
+PROJECT_ID="prj_AsnpRn0cE20N6E8ODKo4o8RTzsi3"
+
+publish_production() {
+  local sha="$1"
+  sleep 20
+  local existing
+  existing="$("$VERCEL" api "/v6/deployments?projectId=${PROJECT_ID}&limit=8" 2>/dev/null | /usr/bin/python3 -c '
+import json, sys
+raw = sys.stdin.read()
+start = raw.find("{")
+if start < 0:
+    sys.exit(0)
+data = json.loads(raw[start:])
+sha = sys.argv[1]
+for item in data.get("deployments", []):
+    meta = item.get("meta") or {}
+    if meta.get("githubCommitSha") == sha:
+        print(item.get("url") or "yes")
+        break
+' "$sha")"
+  if [ -n "$existing" ]; then
+    log "production deployment already started for ${sha:0:7}"
+    return 0
+  fi
+  if "$VERCEL" api /v13/deployments -X POST --input - <<EOF
+{
+  "name": "galami-labs",
+  "project": "${PROJECT_ID}",
+  "target": "production",
+  "gitSource": {
+    "type": "github",
+    "repoId": 1407958110,
+    "ref": "${sha}"
+  }
+}
+EOF
+  then
+    log "requested production deployment for ${sha:0:7}"
+  else
+    log "could not request production deployment for ${sha:0:7}"
+  fi
+}
 
 WAIT="${AUTOSHIP_WAIT:-30}"
 LOCK="$REPO/.git/autoship.lock"
@@ -87,14 +130,17 @@ if [ "$ahead" = "0" ]; then
   exit 0
 fi
 
+sha="$(git rev-parse HEAD)"
 if git push origin main; then
   log "pushed ${ahead} commit(s) to origin/main"
+  publish_production "$sha"
   exit 0
 fi
 
 log "push failed; trying rebase"
 if git pull --rebase --autostash origin main && git push origin main; then
   log "pushed after rebase"
+  publish_production "$(git rev-parse HEAD)"
 else
   log "push still failed"
 fi
