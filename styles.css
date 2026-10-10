@@ -48,10 +48,9 @@ body {
   z-index: 3;
 }
 
-@media (min-aspect-ratio: 4/5) {
-  .pin.is-away img:not(.end-still):not(.peak):not(.range):not(.peak-close) {
-    visibility: hidden;
-  }
+.pin.is-away .start-still,
+.pin.is-away img:not(.end-still):not(.peak):not(.range):not(.peak-close) {
+  visibility: hidden;
 }
 
 .end-still {
@@ -960,53 +959,29 @@ body {
     display: block;
   }
 
-  html.is-phone .scrub,
-  .scrub {
-    height: 185vh;
+  .pin {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh;
   }
 
-  .hero-video {
-    display: none;
-  }
-
-  .start-still,
-  .end-still,
-  .wordmark {
-    transition: none;
-  }
-
-  .pin.home .next {
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .start-still {
-    opacity: calc(1 - var(--mix, 0));
-    visibility: visible;
-  }
-
-  .end-still {
-    opacity: var(--mix, 0);
-    visibility: visible;
-  }
-
-  .pin.is-end .end-still {
-    opacity: 1;
+  .pin img,
+  .pin video {
+    object-fit: cover;
+    object-position: center center;
   }
 
   .wordmark {
-    top: calc(10.5vh + env(safe-area-inset-top));
-    font-size: clamp(2.45rem, 12vw, 3.3rem);
-    padding: 0 0.75rem;
-  }
-
-  .pin.is-away:not(.is-end) .wordmark {
-    opacity: calc(1 - var(--mix, 0));
-    visibility: visible;
-  }
-
-  .pin.is-away:not(.is-end) .next {
-    opacity: calc(1 - min(1, var(--mix, 0) * 1.8));
-    pointer-events: none;
+    top: max(14vh, env(safe-area-inset-top));
+    left: 0;
+    right: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 10.5vw;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
   }
 
   .statement {

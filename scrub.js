@@ -17,18 +17,32 @@ const progress = () => {
   return distance > 0 ? Math.min(1, Math.max(0, window.scrollY / distance)) : 0;
 };
 
+const fitPhonePin = () => {
+  if (!isPhone()) {
+    pin.style.position = "";
+    pin.style.top = "";
+    pin.style.left = "";
+    pin.style.width = "";
+    pin.style.height = "";
+    return;
+  }
+  const viewport = window.visualViewport;
+  const height = viewport ? viewport.height : window.innerHeight;
+  const top = viewport ? viewport.offsetTop : 0;
+  pin.style.position = "fixed";
+  pin.style.top = `${top}px`;
+  pin.style.left = "0px";
+  pin.style.width = "100%";
+  pin.style.height = `${Math.round(height)}px`;
+};
+
 const updateChrome = () => {
   const amount = progress();
-  const atEnd = amount > (isPhone() ? 0.8 : 0.98);
+  const atEnd = amount > 0.98;
   const atStart = amount <= 0.02 && !playing && !driving;
   pin.classList.toggle("is-away", !atStart);
   pin.classList.toggle("is-end", atEnd);
-  if (isPhone()) {
-    const blend = Math.min(1, Math.max(0, amount / 0.8));
-    pin.style.setProperty("--mix", blend.toFixed(4));
-  } else {
-    pin.style.removeProperty("--mix");
-  }
+  pin.style.removeProperty("--mix");
   endStill.setAttribute("aria-hidden", atEnd ? "false" : "true");
   nextButton.disabled = !atStart;
   nextButton.setAttribute("aria-hidden", atStart ? "false" : "true");
@@ -88,7 +102,6 @@ const handsRate = (time) => {
 const seek = () => {
   queued = false;
   updateChrome();
-  if (isPhone()) return;
   if (driving) return;
   const duration = video.duration;
   if (!Number.isFinite(duration) || duration <= 0 || video.seekable.length === 0) return;
@@ -210,58 +223,73 @@ window.addEventListener("touchmove", () => {
 }, { passive: true });
 
 let videoReady = false;
+let videoBound = false;
+let activeSource = "";
+
+const scrubSource = () => (
+  isPhone()
+    ? (video.dataset.phoneScrub || "iPhone Video 1.0.mp4")
+    : (video.dataset.scrub || "scrub.mp4")
+);
 
 const enableVideo = () => {
-  if (videoReady || reduceMotion.matches || isPhone()) return;
-  videoReady = true;
+  if (reduceMotion.matches || !video) return;
+  const source = scrubSource();
+  if (videoReady && activeSource === source) return;
 
-  const reveal = () => {
-    video.classList.add("is-ready");
-  };
+  if (!videoBound) {
+    videoBound = true;
+    const reveal = () => {
+      video.classList.add("is-ready");
+    };
 
-  video.addEventListener("loadedmetadata", requestSeek);
-  video.addEventListener("canplay", requestSeek);
-  video.addEventListener("progress", requestSeek);
-  video.addEventListener("seeked", reveal);
-  if ("requestVideoFrameCallback" in video) {
+    video.addEventListener("loadedmetadata", requestSeek);
+    video.addEventListener("canplay", requestSeek);
+    video.addEventListener("progress", requestSeek);
+    video.addEventListener("seeked", reveal);
     video.addEventListener("loadeddata", () => {
-      video.requestVideoFrameCallback(reveal);
-    }, { once: true });
+      video.removeAttribute("poster");
+      const started = video.play();
+      const unlock = () => {
+        video.pause();
+        frame = -1;
+        requestSeek();
+      };
+      if (started && typeof started.then === "function") {
+        started.then(unlock).catch(unlock);
+      } else {
+        unlock();
+      }
+      if ("requestVideoFrameCallback" in video) {
+        video.requestVideoFrameCallback(reveal);
+      }
+    });
   }
 
-  video.addEventListener("loadeddata", () => {
-    video.removeAttribute("poster");
-    const started = video.play();
-    const unlock = () => {
-      video.pause();
-      requestSeek();
-    };
-    if (started && typeof started.then === "function") {
-      started.then(unlock).catch(unlock);
-    } else {
-      unlock();
-    }
-  });
-
+  videoReady = true;
+  activeSource = source;
+  frame = -1;
   video.preload = "auto";
-  video.poster = "trial-first.jpg";
-  video.src = video.dataset.scrub || "scrub.mp4";
-  window.addEventListener("scroll", requestSeek, { passive: true });
-  window.addEventListener("resize", requestSeek);
+  video.poster = isPhone() ? "Mobile First Frame.jpg" : "trial-first.jpg";
+  video.src = source;
 };
 
-if (!reduceMotion.matches && !isPhone()) {
-  enableVideo();
-} else if (!isPhone()) {
-  window.addEventListener("scroll", updateChrome, { passive: true });
-}
+fitPhonePin();
+if (!reduceMotion.matches) enableVideo();
 
-window.addEventListener("scroll", () => {
-  if (isPhone()) updateChrome();
-}, { passive: true });
+window.addEventListener("scroll", requestSeek, { passive: true });
 window.addEventListener("resize", () => {
-  if (isPhone()) updateChrome();
+  fitPhonePin();
+  if (!reduceMotion.matches) enableVideo();
+  requestSeek();
 });
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", () => {
+    fitPhonePin();
+    requestSeek();
+  });
+  window.visualViewport.addEventListener("scroll", fitPhonePin);
+}
 
 const peaks = document.querySelector(".peaks");
 const advance = document.querySelector(".advance");
@@ -341,6 +369,7 @@ const peakCount = document.querySelector(".peak-close") ? 4 : document.querySele
 let peakIndex = 0;
 
 const placeSummits = () => {
+  fitPhonePin();
   if (!summitLayer || !endStill.naturalWidth) return;
   const viewW = pin.clientWidth;
   const viewH = pin.clientHeight;
@@ -539,8 +568,12 @@ if (peaks && advance && prevStep && nextStep) {
 
 phoneQuery.addEventListener("change", () => {
   document.documentElement.classList.toggle("is-phone", isPhone());
-  if (isPhone() && playing) stopPlayback();
-  if (!isPhone() && !reduceMotion.matches) enableVideo();
+  if (playing) stopPlayback();
+  videoReady = false;
+  activeSource = "";
+  frame = -1;
+  fitPhonePin();
+  if (!reduceMotion.matches) enableVideo();
   placeSummits();
   updateChrome();
 });
