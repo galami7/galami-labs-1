@@ -282,27 +282,11 @@ const finishPhoneLoad = () => {
   document.documentElement.classList.add("is-video-ready");
 };
 
-const videoCanScrub = () => {
-  const duration = video.duration;
-  if (!Number.isFinite(duration) || duration <= 0 || video.seekable.length === 0) return false;
-  return video.seekable.end(video.seekable.length - 1) >= duration - 0.3;
-};
-
-const waitUntilScrubbable = () => new Promise((resolve) => {
-  const started = performance.now();
-  const tick = () => {
-    if (videoCanScrub() || performance.now() - started > 8000) {
-      resolve();
-      return;
-    }
-    requestAnimationFrame(tick);
-  };
-  tick();
-});
-
 let phoneBlobUrl = "";
 
 const loadEntireVideo = async (source) => {
+  const openPage = () => finishPhoneLoad();
+  const giveUp = window.setTimeout(openPage, 12000);
   try {
     const response = await fetch(source);
     if (!response.ok || !response.body) throw new Error("missing video");
@@ -320,18 +304,16 @@ const loadEntireVideo = async (source) => {
     setLoadProgress(1);
     if (phoneBlobUrl) URL.revokeObjectURL(phoneBlobUrl);
     phoneBlobUrl = URL.createObjectURL(new Blob(chunks, { type: "video/mp4" }));
-    await new Promise((resolve, reject) => {
-      video.addEventListener("loadeddata", resolve, { once: true });
-      video.addEventListener("error", () => reject(new Error("decode")), { once: true });
-      video.src = phoneBlobUrl;
-    });
-    await waitUntilScrubbable();
+    video.src = phoneBlobUrl;
+    video.load();
+    window.clearTimeout(giveUp);
+    openPage();
     frame = -1;
     requestSeek();
-    finishPhoneLoad();
   } catch (error) {
-    video.src = source;
-    finishPhoneLoad();
+    window.clearTimeout(giveUp);
+    if (!video.currentSrc) video.src = source;
+    openPage();
   }
 };
 
