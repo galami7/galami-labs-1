@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#3f6fc4" />
+    <title>Slide Mobile 1.0</title>
+    <style>
+      :root {
+        --sky: #3f6fc4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--sky);
+        color: #fff;
+        overflow: hidden;
+      }
+
+      .deck {
+        --slide: 0;
+        --frame: max(100vw, calc(100dvh * 9 / 16));
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        background: var(--sky);
+        touch-action: none;
+      }
+
+      .strip,
+      .notes {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        height: calc(var(--frame) * 16 / 9);
+        transform: translate3d(calc((100vw - var(--frame)) / 2 - var(--slide) * var(--frame)), -50%, 0);
+        will-change: transform;
+      }
+
+      .strip {
+        width: calc(var(--frame) * 4);
+        object-fit: fill;
+        user-select: none;
+        -webkit-user-drag: none;
+        pointer-events: none;
+      }
+
+      .notes {
+        width: calc(var(--frame) * 4);
+        pointer-events: none;
+      }
+
+      .note {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: var(--frame);
+      }
+
+      .note:nth-child(2) { left: calc(var(--frame) * 1); }
+      .note:nth-child(3) { left: calc(var(--frame) * 2); }
+      .note:nth-child(4) { left: calc(var(--frame) * 3); }
+
+      .phase-copy,
+      .contact-card {
+        color: #fff;
+        font-family: system-ui, sans-serif;
+        text-shadow: 0 1px 10px rgba(8, 28, 64, 0.35);
+      }
+
+      .phase-copy {
+        position: absolute;
+        top: 16%;
+        left: 50%;
+        width: min(20rem, calc(100vw - 2.4rem));
+        margin: 0;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+
+      .phase-kicker,
+      .phase-title,
+      .phase-text,
+      .contact-kicker,
+      .contact-title {
+        margin: 0;
+      }
+
+      .phase-kicker,
+      .contact-kicker {
+        font-weight: 500;
+        font-size: 0.95rem;
+        letter-spacing: 0.04em;
+        color: rgba(255, 255, 255, 0.86);
+      }
+
+      .phase-title {
+        margin-top: 0.4rem;
+        font-weight: 500;
+        font-size: clamp(1.9rem, 8.4vw, 2.6rem);
+        line-height: 0.95;
+        letter-spacing: -0.045em;
+      }
+
+      .phase-text {
+        margin-top: 0.7rem;
+        font-size: 1.02rem;
+        line-height: 1.35;
+        color: rgba(255, 255, 255, 0.92);
+        text-wrap: balance;
+      }
+
+      .contact-card {
+        position: absolute;
+        top: 12%;
+        left: calc(50% - 50vw + 1.1rem);
+        width: min(13rem, 48vw);
+        text-align: left;
+        pointer-events: none;
+      }
+
+      .contact-title {
+        margin-top: 0.45rem;
+        font-weight: 500;
+        font-size: clamp(1.55rem, 6.4vw, 2rem);
+        line-height: 0.98;
+        letter-spacing: -0.04em;
+      }
+
+      .contact-email {
+        margin-top: 0.95rem;
+        pointer-events: auto;
+      }
+
+      .contact-email label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+
+      .contact-email-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+
+      .contact-email input,
+      .contact-email button {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        font: 500 0.95rem/1 system-ui, sans-serif;
+      }
+
+      .contact-email input {
+        padding: 0.72rem 0.85rem;
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+        text-shadow: none;
+      }
+
+      .contact-email input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .contact-email button {
+        padding: 0.72rem 1rem;
+        background: #fff;
+        color: #141414;
+        cursor: pointer;
+      }
+
+      .contact-status {
+        margin: 0.55rem 0 0;
+        font: 400 0.82rem/1.3 system-ui, sans-serif;
+      }
+
+      .next-peak {
+        position: absolute;
+        left: 28%;
+        top: 78%;
+        width: 1.4rem;
+        height: 1.4rem;
+        color: #fff;
+        text-decoration: none;
+        text-shadow: 0 1px 8px rgba(8, 28, 64, 0.45);
+        transform: translate(-50%, -50%);
+        pointer-events: auto;
+      }
+
+      .next-peak-line {
+        position: absolute;
+        left: 50%;
+        bottom: 50%;
+        width: 1px;
+        height: 2.8rem;
+        background: rgba(255, 255, 255, 0.92);
+        transform: translateX(-50%);
+      }
+
+      .next-peak-label {
+        position: absolute;
+        left: 50%;
+        bottom: calc(50% + 3rem);
+        width: max-content;
+        max-width: 70vw;
+        transform: translateX(-50%);
+        text-align: center;
+        font-family: system-ui, sans-serif;
+      }
+
+      .next-peak-name,
+      .next-peak-meta {
+        display: block;
+      }
+
+      .next-peak-name {
+        font: 500 0.92rem/1.15 system-ui, sans-serif;
+      }
+
+      .next-peak-meta {
+        margin-top: 0.2rem;
+        font: 400 0.78rem/1 system-ui, sans-serif;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .readout {
+        position: absolute;
+        z-index: 3;
+        top: calc(1.05rem + env(safe-area-inset-top));
+        left: calc(1.15rem + env(safe-area-inset-left));
+        font: 500 1.05rem/1 system-ui, sans-serif;
+        text-shadow: 0 1px 12px rgba(8, 28, 64, 0.55);
+      }
+
+      .readout[hidden] {
+        display: none;
+      }
+
+      .exit,
+      .step {
+        position: absolute;
+        z-index: 3;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        color: #141414;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      .exit {
+        top: calc(0.85rem + env(safe-area-inset-top));
+        right: calc(0.85rem + env(safe-area-inset-right));
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0;
+        background: none;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .exit svg,
+      .step svg {
+        width: 1.35rem;
+        height: 1.35rem;
+      }
+
+      .step {
+        top: 50%;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 999px;
+        transform: translateY(-50%);
+      }
+
+      .step[hidden] {
+        display: none;
+      }
+
+      .step-prev { left: calc(0.85rem + env(safe-area-inset-left)); }
+      .step-next { right: calc(0.85rem + env(safe-area-inset-right)); }
+
+      @media (prefers-reduced-motion: reduce) {
+        .strip,
+        .notes {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck">
+      <img class="strip" src="../Slide%20Mobile%201.0.jpg" alt="Four phone frames of the mountain slideshow" draggable="false" />
+      <div class="notes">
+        <article class="note">
+          <div class="phase-copy">
+            <p class="phase-kicker">Phase 1</p>
+            <h2 class="phase-title">Agentic AI</h2>
+            <p class="phase-text">Learn to use agents on real workflows</p>
+          </div>
+        </article>
+        <article class="note">
+          <div class="phase-copy">
+            <p class="phase-kicker">Phase 2</p>
+            <h2 class="phase-title">Build Software</h2>
+            <p class="phase-text">Create software people can open and use</p>
+          </div>
+        </article>
+        <article class="note">
+          <div class="phase-copy">
+            <p class="phase-kicker">Phase 3</p>
+            <h2 class="phase-title">Launch Consultancy</h2>
+            <p class="phase-text">Put this to work on company projects</p>
+          </div>
+        </article>
+        <article class="note">
+          <div class="contact-card">
+            <p class="contact-kicker">Thanks for the visit!</p>
+            <h2 class="contact-title">Join the Expedition</h2>
+            <form class="contact-email">
+              <label for="expedition-email">Email</label>
+              <div class="contact-email-row">
+                <input id="expedition-email" type="email" name="email" required autocomplete="email" placeholder="Your email" />
+                <button type="submit">Join</button>
+              </div>
+              <p class="contact-status" hidden></p>
+            </form>
+          </div>
+          <a class="next-peak" href="https://www.guillaumegruyters.com/" target="_blank" rel="noreferrer">
+            <span class="next-peak-label">
+              <span class="next-peak-name">Want to explore more?</span>
+              <span class="next-peak-meta">tap here</span>
+            </span>
+            <span class="next-peak-line"></span>
+          </a>
+        </article>
+      </div>
+      <p class="readout">1,798 m</p>
+      <a class="exit" href="../" aria-label="Back to Galami Labs">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </a>
+      <button type="button" class="step step-prev" hidden aria-label="Previous mountain">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button type="button" class="step step-next" aria-label="Next mountain">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </main>
+    <script>
+      const deck = document.querySelector(".deck");
+      const readout = document.querySelector(".readout");
+      const prev = document.querySelector(".step-prev");
+      const next = document.querySelector(".step-next");
+      const heights = ["1,798 m", "2,128 m", "4,478 m"];
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const count = 4;
+      let index = 0;
+      let from = 0;
+      let to = 0;
+      let started = 0;
+      let frame = 0;
+
+      const paint = (value) => {
+        deck.style.setProperty("--slide", String(value));
+      };
+
+      const chrome = () => {
+        prev.hidden = index <= 0;
+        next.hidden = index >= count - 1;
+        readout.hidden = index >= 3;
+        if (index < 3) readout.textContent = heights[index];
+      };
+
+      const tick = (now) => {
+        const t = Math.min(1, (now - started) / 620);
+        const eased = 1 - (1 - t) ** 2;
+        paint(from + (to - from) * eased);
+        if (t < 1) frame = requestAnimationFrame(tick);
+        else {
+          frame = 0;
+          paint(to);
+        }
+      };
+
+      const show = (nextIndex) => {
+        if (nextIndex < 0 || nextIndex >= count || nextIndex === index) return;
+        index = nextIndex;
+        chrome();
+        from = to;
+        const current = getComputedStyle(deck).getPropertyValue("--slide");
+        if (current) from = Number(current) || from;
+        to = index;
+        if (reduce) {
+          paint(to);
+          return;
+        }
+        started = performance.now();
+        if (!frame) frame = requestAnimationFrame(tick);
+      };
+
+      prev.addEventListener("click", () => show(index - 1));
+      next.addEventListener("click", () => show(index + 1));
+
+      let startX = 0;
+      let startY = 0;
+      deck.addEventListener("touchstart", (event) => {
+        startX = event.changedTouches[0].clientX;
+        startY = event.changedTouches[0].clientY;
+      }, { passive: true });
+      deck.addEventListener("touchend", (event) => {
+        const dx = event.changedTouches[0].clientX - startX;
+        const dy = event.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        show(index + (dx < 0 ? 1 : -1));
+      }, { passive: true });
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight") show(index + 1);
+        if (event.key === "ArrowLeft") show(index - 1);
+      });
+
+      document.querySelector(".contact-email").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const email = new FormData(event.currentTarget).get("email").trim();
+        if (!email) return;
+        const mail = `mailto:guillaume.gruyters@gmail.com?subject=${encodeURIComponent("Join the Expedition")}&body=${encodeURIComponent(email)}`;
+        window.location.href = mail;
+        event.currentTarget.reset();
+        const status = event.currentTarget.querySelector(".contact-status");
+        status.hidden = false;
+        status.textContent = "That opens in your mail app.";
+      });
+
+      chrome();
+      paint(0);
+    </script>
+  </body>
+</html>
