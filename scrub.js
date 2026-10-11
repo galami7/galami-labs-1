@@ -572,11 +572,13 @@ const fitPilatusStick = () => {
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   const full = 2.45 * rem;
   const gap = 0.3 * rem;
-  const pad = 0.45 * rem;
+  const pad = 0.4 * rem;
+  const ink = document.createRange();
+  ink.selectNodeContents(title);
   const apexLocal = parseFloat(getComputedStyle(spot).getPropertyValue("--apex-y"));
   const apex = spot.getBoundingClientRect().top + (Number.isFinite(apexLocal) ? apexLocal : 0.6 * rem);
-  const room = apex - title.getBoundingClientRect().bottom - label.offsetHeight - gap - pad;
-  const stick = Math.max(0.55 * rem, Math.min(full, room));
+  const room = apex - ink.getBoundingClientRect().bottom - label.offsetHeight - gap - pad;
+  const stick = Math.min(full, Math.max(0, room));
   spot.style.setProperty("--stick", `${stick}px`);
 };
 
