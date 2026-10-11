@@ -23,10 +23,9 @@
         width: 3.25rem;
         height: 3.25rem;
         bottom: calc(1.85rem + env(safe-area-inset-bottom));
-        background: rgba(255, 255, 255, 0.22);
-        color: #fff;
-        backdrop-filter: blur(14px) saturate(1.2);
-        -webkit-backdrop-filter: blur(14px) saturate(1.2);
+        background: #fff;
+        color: #141414;
+        box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
         transform: translateX(-50%);
         transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
       }
@@ -35,26 +34,6 @@
         .home .next {
           bottom: calc(1.85rem + var(--chrome-bottom, env(safe-area-inset-bottom)));
         }
-      }
-
-      .home .next::before {
-        content: "";
-        position: absolute;
-        z-index: 1;
-        inset: 0;
-        border-radius: inherit;
-        padding: 1.5px;
-        background: conic-gradient(from var(--turn), rgba(255, 255, 255, 0.28), #fff 8%, rgba(255, 255, 255, 0.28) 20%);
-        pointer-events: none;
-        animation: email-sweep 3.8s linear infinite;
-        -webkit-mask:
-          linear-gradient(#fff 0 0) content-box,
-          linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask:
-          linear-gradient(#fff 0 0) content-box,
-          linear-gradient(#fff 0 0);
-        mask-composite: exclude;
       }
 
       .home .next svg {
@@ -74,10 +53,8 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .home .next,
-        .home .next::before {
+        .home .next {
           transition: none;
-          animation: none;
         }
       }
     </style>
@@ -245,6 +222,12 @@
           </nav>
           <p class="more-sign">Galami Labs by Guillaume Gruyters.</p>
         </div>
+        <nav class="peak-dots" hidden aria-label="Slideshow">
+          <button type="button" aria-label="Agentic AI"></button>
+          <button type="button" aria-label="Build Software"></button>
+          <button type="button" aria-label="Launch Consultancy"></button>
+          <button type="button" aria-label="Join the Expedition"></button>
+        </nav>
         <button type="button" class="step step-next" hidden aria-label="Next mountain">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5.5 12h10M11.5 7.5 16.5 12l-5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />

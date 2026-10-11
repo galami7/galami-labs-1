@@ -430,6 +430,7 @@ const nextStep = document.querySelector(".step-next");
 const summitLayer = document.querySelector(".summits");
 const peakExit = document.querySelector(".peak-exit");
 const replay = document.querySelector(".replay");
+const peakDots = document.querySelector(".peak-dots");
 if (replay) replay.addEventListener("click", playToStart);
 const moreFog = document.querySelector(".more-fog");
 const peakReadout = document.querySelector(".peak-readout");
@@ -578,6 +579,15 @@ function syncPeaks() {
   if (replay) replay.hidden = open || !atEnd;
   if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
   if (nextStep) nextStep.hidden = !open || peakIndex >= peakCount - 1;
+  if (peakDots) {
+    peakDots.hidden = !open;
+    peakDots.querySelectorAll("button").forEach((dot, index) => {
+      const on = open && index === peakIndex;
+      dot.classList.toggle("is-on", on);
+      if (on) dot.setAttribute("aria-current", "step");
+      else dot.removeAttribute("aria-current");
+    });
+  }
   if (peakExit) {
     const onFinal = open && peakIndex === peakCount - 1;
     const menuOpen = onFinal && moreFog && !moreFog.hidden;
@@ -695,6 +705,11 @@ if (peaks && advance && prevStep && nextStep) {
   }, { passive: true });
   prevStep.addEventListener("click", () => showPeak(peakIndex - 1, true));
   nextStep.addEventListener("click", () => showPeak(peakIndex + 1, true));
+  if (peakDots) {
+    peakDots.querySelectorAll("button").forEach((dot, index) => {
+      dot.addEventListener("click", () => showPeak(index));
+    });
+  }
   const closeMore = () => {
     if (!moreFog || moreFog.hidden) return;
     moreFog.hidden = true;
