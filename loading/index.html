@@ -105,18 +105,19 @@
         text-align: center;
         pointer-events: none;
         opacity: 1;
+        transform: none;
       }
 
       html.is-open .home-lock {
-        transition:
-          top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
-          transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
-          opacity 0.7s ease;
+        transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease;
+      }
+
+      html:not(.is-open) .home-lock {
+        transition: none;
       }
 
       html[data-screen="sky"]:not(.is-open) .home-lock {
-        top: 50%;
-        transform: translateY(-62%);
+        transform: translateY(calc(50dvh - 14vh - 2.2rem));
       }
 
       html[data-screen="altitude"]:not(.is-open) .home-lock {
@@ -275,11 +276,11 @@
 
       .alt-value {
         display: block;
-        width: 5.2ch;
+        width: 5.35ch;
         text-align: right;
         font-variant-numeric: tabular-nums;
         font-weight: 500;
-        font-size: clamp(4.75rem, 18vw, 8.75rem);
+        font-size: clamp(3.35rem, 14vw, 8.25rem);
         line-height: 0.9;
         letter-spacing: -0.055em;
       }
@@ -452,6 +453,10 @@
           top: max(calc(24px + 12svh), calc(env(safe-area-inset-top) + 0.85rem));
         }
 
+        html[data-screen="sky"]:not(.is-open) .home-lock {
+          transform: translateY(calc(40dvh - 12svh));
+        }
+
         .home-mark {
           font-size: 10.5vw;
         }
@@ -467,7 +472,7 @@
         }
 
         .alt-value {
-          font-size: 22vw;
+          font-size: 14vw;
         }
       }
 
@@ -509,7 +514,7 @@
           <p class="alt-note">Altitude</p>
         </div>
         <div class="instrument instrument-peaks" aria-hidden="true">
-          <div class="summit" style="--x: 22%">
+          <div class="summit" style="--x: 28%">
             <span class="summit-label"><span class="summit-name">Rigi</span><span class="summit-height">1,798 m</span></span>
             <span class="summit-line"></span>
           </div>
@@ -517,7 +522,7 @@
             <span class="summit-label"><span class="summit-name">Pilatus</span><span class="summit-height">2,128 m</span></span>
             <span class="summit-line"></span>
           </div>
-          <div class="summit" style="--x: 78%">
+          <div class="summit" style="--x: 72%">
             <span class="summit-label"><span class="summit-name">Matterhorn</span><span class="summit-height">4,478 m</span></span>
             <span class="summit-line"></span>
           </div>
