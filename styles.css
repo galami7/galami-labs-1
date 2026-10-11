@@ -283,11 +283,9 @@ body {
   height: 4.75rem;
   padding: 0;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.28);
-  color: #fff;
-  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.16);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  background: #fff;
+  color: #141414;
+  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
 }
 
 .next::before,
@@ -295,10 +293,10 @@ body {
   content: "";
   position: absolute;
   z-index: 1;
-  inset: 0;
+  inset: -2.5px;
   border-radius: inherit;
-  padding: 1.5px;
-  background: conic-gradient(from var(--turn), rgba(255, 255, 255, 0.28), #fff 8%, rgba(255, 255, 255, 0.28) 20%);
+  padding: 2px;
+  background: conic-gradient(from var(--turn), rgba(255, 255, 255, 0.2), #fff 8%, rgba(255, 255, 255, 0.2) 20%);
   pointer-events: none;
   animation: email-sweep 3.8s linear infinite;
   -webkit-mask:
@@ -881,11 +879,9 @@ body {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-  color: #fff;
-  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.16);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  background: #fff;
+  color: #141414;
+  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
   cursor: pointer;
   transform: translateY(-50%);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
