@@ -1231,6 +1231,7 @@ body {
   .peak-exit,
   .more-fog,
   .contact-email button,
+  .next::before,
   .contact-email-field::before,
   .next-peak-copy,
   .next-peak-site,

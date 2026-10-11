@@ -23,6 +23,13 @@
         width: 3.25rem;
         height: 3.25rem;
         bottom: calc(1.85rem + env(safe-area-inset-bottom));
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
+        box-shadow: none;
+        backdrop-filter: blur(14px) saturate(1.2);
+        -webkit-backdrop-filter: blur(14px) saturate(1.2);
+        transform: translateX(-50%);
+        transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
       @media (max-aspect-ratio: 4/5) {
@@ -31,15 +38,29 @@
         }
       }
 
-      .home .next {
-        background: #fff;
-        color: #141414;
-        box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
-        transform: translateX(-50%);
-        transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      .home .next::before {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1.5px;
+        background: conic-gradient(from var(--turn), rgba(255, 255, 255, 0.28), #fff 8%, rgba(255, 255, 255, 0.28) 20%);
+        pointer-events: none;
+        animation: email-sweep 3.8s linear infinite;
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        mask-composite: exclude;
       }
 
       .home .next svg {
+        position: relative;
+        z-index: 2;
         width: 1.45rem;
         height: 1.45rem;
       }
@@ -54,8 +75,10 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .home .next {
+        .home .next,
+        .home .next::before {
           transition: none;
+          animation: none;
         }
       }
     </style>
@@ -102,7 +125,7 @@
         <h1 class="wordmark">Galami Labs</h1>
         <button type="button" class="next" aria-label="Scroll to next">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M12 5.5v10M7.5 11.5 12 16.5l4.5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
         <div class="peaks" hidden>
