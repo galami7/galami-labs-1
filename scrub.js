@@ -244,6 +244,38 @@ const playToEnd = () => {
   playFrame = requestAnimationFrame(step);
 };
 
+const playToStart = () => {
+  if (reduceMotion.matches || maxScroll() === 0) {
+    stopPlayback();
+    window.scrollTo(0, runway());
+    updateChrome();
+    return;
+  }
+
+  stopPlayback();
+  playing = true;
+  const start = window.scrollY;
+  const target = runway();
+  const duration = 2000;
+  const startedAt = performance.now();
+
+  const step = (now) => {
+    if (!playing) return;
+    const t = Math.min(1, (now - startedAt) / duration);
+    window.scrollTo(0, start + (target - start) * t);
+    requestSeek();
+    if (t < 1) {
+      playFrame = requestAnimationFrame(step);
+      return;
+    }
+    playing = false;
+    window.scrollTo(0, target);
+    updateChrome();
+  };
+
+  playFrame = requestAnimationFrame(step);
+};
+
 nextButton.addEventListener("click", playToEnd);
 window.addEventListener("touchstart", () => {
   if (!video || video.readyState < 2) return;
@@ -397,6 +429,8 @@ const prevStep = document.querySelector(".step-prev");
 const nextStep = document.querySelector(".step-next");
 const summitLayer = document.querySelector(".summits");
 const peakExit = document.querySelector(".peak-exit");
+const replay = document.querySelector(".replay");
+if (replay) replay.addEventListener("click", playToStart);
 const moreFog = document.querySelector(".more-fog");
 const peakReadout = document.querySelector(".peak-readout");
 const peakHeights = ["1,798 m", "2,128 m", "4,478 m"];
@@ -541,6 +575,7 @@ function syncPeaks() {
   const open = pin.classList.contains("is-peaks");
   const atEnd = pin.classList.contains("is-end");
   advance.hidden = open || !atEnd;
+  if (replay) replay.hidden = open || !atEnd;
   if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
   if (nextStep) nextStep.hidden = !open || peakIndex >= peakCount - 1;
   if (peakExit) {

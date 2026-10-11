@@ -863,7 +863,8 @@ body {
   transform: translateY(-50%) scale(1.08);
 }
 
-.peak-exit {
+.peak-exit,
+.replay {
   position: absolute;
   z-index: 9;
   top: calc(1.05rem + env(safe-area-inset-top));
@@ -882,11 +883,14 @@ body {
 }
 
 .peak-exit:hover,
-.peak-exit:focus-visible {
+.peak-exit:focus-visible,
+.replay:hover,
+.replay:focus-visible {
   transform: scale(1.12);
 }
 
-.peak-exit svg {
+.peak-exit svg,
+.replay svg {
   width: 1.45rem;
   height: 1.45rem;
 }
@@ -969,6 +973,7 @@ body {
 
 .advance[hidden],
 .step[hidden],
+.replay[hidden],
 .peak-exit[hidden],
 .peak-readout[hidden],
 .peaks[hidden] {
@@ -1218,6 +1223,7 @@ body {
   .summits,
   .height-reel,
   .step,
+  .replay,
   .peak-exit,
   .more-fog,
   .contact-email button,
