@@ -283,20 +283,23 @@ body {
   height: 4.75rem;
   padding: 0;
   justify-content: center;
-  background: #fff;
-  color: #141414;
-  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
 
 .next::before,
-.step::before {
+.step::before,
+.advance::before,
+.contact-email button::before {
   content: "";
   position: absolute;
   z-index: 1;
-  inset: -2.5px;
+  inset: 0;
   border-radius: inherit;
-  padding: 2px;
-  background: conic-gradient(from var(--turn), rgba(255, 255, 255, 0.2), #fff 8%, rgba(255, 255, 255, 0.2) 20%);
+  padding: 1.5px;
+  background: conic-gradient(from var(--turn), rgba(255, 255, 255, 0.28), #fff 8%, rgba(255, 255, 255, 0.28) 20%);
   pointer-events: none;
   animation: email-sweep 3.8s linear infinite;
   -webkit-mask:
@@ -320,8 +323,10 @@ body {
 .advance {
   bottom: calc(2.65rem + env(safe-area-inset-bottom));
   padding: 0.9rem 1.45rem;
-  background: #fff;
-  color: #141414;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   font-size: 1.12rem;
   transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -632,11 +637,14 @@ body {
 }
 
 .contact-email button {
+  position: relative;
   padding: 0.72rem 1.05rem;
   border: 0;
   border-radius: 999px;
-  background: #fff;
-  color: #141414;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   font: 500 0.95rem/1 system-ui, sans-serif;
   text-shadow: none;
   cursor: pointer;
@@ -879,9 +887,10 @@ body {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: #fff;
-  color: #141414;
-  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   cursor: pointer;
   transform: translateY(-50%);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1264,6 +1273,8 @@ body {
   .contact-email button,
   .next::before,
   .step::before,
+  .advance::before,
+  .contact-email button::before,
   .contact-email-field::before,
   .next-peak-copy,
   .next-peak-site,
