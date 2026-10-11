@@ -23,9 +23,9 @@
         width: 3.25rem;
         height: 3.25rem;
         bottom: calc(1.85rem + env(safe-area-inset-bottom));
-        background: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.28);
         color: #fff;
-        box-shadow: none;
+        box-shadow: 0 8px 22px rgba(8, 28, 64, 0.16);
         backdrop-filter: blur(14px) saturate(1.2);
         -webkit-backdrop-filter: blur(14px) saturate(1.2);
         transform: translateX(-50%);
@@ -221,7 +221,7 @@
         <button type="button" class="advance" hidden>Explore the Range</button>
         <button type="button" class="step step-prev" hidden aria-label="Previous mountain">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M18.5 12H8.5M12.5 7.5 7.5 12l5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
         <button type="button" class="replay" hidden aria-label="Replay">
@@ -248,7 +248,7 @@
         </div>
         <button type="button" class="step step-next" hidden aria-label="Next mountain">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M5.5 12h10M11.5 7.5 16.5 12l-5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
       </div>

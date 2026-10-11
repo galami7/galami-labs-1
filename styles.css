@@ -283,9 +283,37 @@ body {
   height: 4.75rem;
   padding: 0;
   justify-content: center;
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.16);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+.next::before,
+.step::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--turn), rgba(255, 255, 255, 0.28), #fff 8%, rgba(255, 255, 255, 0.28) 20%);
+  pointer-events: none;
+  animation: email-sweep 3.8s linear infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
 }
 
 .next svg {
+  position: relative;
+  z-index: 2;
   width: 2.15rem;
   height: 2.15rem;
   animation: bob 1.4s ease-in-out infinite;
@@ -294,6 +322,8 @@ body {
 .advance {
   bottom: calc(2.65rem + env(safe-area-inset-bottom));
   padding: 0.9rem 1.45rem;
+  background: #fff;
+  color: #141414;
   font-size: 1.12rem;
   transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -851,8 +881,11 @@ body {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: #fff;
-  color: #141414;
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(8, 28, 64, 0.16);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   cursor: pointer;
   transform: translateY(-50%);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -985,6 +1018,8 @@ body {
 }
 
 .step svg {
+  position: relative;
+  z-index: 2;
   width: 1.25rem;
   height: 1.25rem;
 }
@@ -1232,6 +1267,7 @@ body {
   .more-fog,
   .contact-email button,
   .next::before,
+  .step::before,
   .contact-email-field::before,
   .next-peak-copy,
   .next-peak-site,

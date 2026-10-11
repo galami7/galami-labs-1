@@ -17,11 +17,8 @@
         width: 4rem;
         height: 4rem;
         bottom: calc(2.15rem + env(safe-area-inset-bottom));
-        background: #fff;
         border: 0;
         box-shadow: none;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
         transform: translateX(-50%);
         transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
       }
@@ -75,7 +72,7 @@
         <h1 class="wordmark">Galami Labs</h1>
         <button type="button" class="next" aria-label="Scroll to next">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M12 5.5v10M7.5 11.5 12 16.5l4.5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
         <div class="peaks" hidden>
@@ -103,12 +100,12 @@
         <button type="button" class="advance" hidden>Explore the Range</button>
         <button type="button" class="step step-prev" hidden aria-label="Previous mountain">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M18.5 12H8.5M12.5 7.5 7.5 12l5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
         <button type="button" class="step step-next" hidden aria-label="Next mountain">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M5.5 12h10M11.5 7.5 16.5 12l-5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
       </div>
