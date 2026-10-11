@@ -560,6 +560,24 @@ const placeSummits = () => {
   if (nextButton) nextButton.style.left = along(isPhone() ? 0.5 : 0.516);
   const advanceButton = document.querySelector(".advance");
   if (advanceButton) advanceButton.style.left = along(isPhone() ? 0.5 : 0.496);
+  fitPilatusStick();
+};
+
+const fitPilatusStick = () => {
+  const marker = document.querySelector(".summit-pilatus");
+  const spot = marker && marker.closest(".summit-spot");
+  const title = document.querySelector(".statement-title");
+  const label = spot && spot.querySelector(".summit-label");
+  if (!spot || !title || !label) return;
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const full = 2.45 * rem;
+  const gap = 0.3 * rem;
+  const pad = 0.45 * rem;
+  const apexLocal = parseFloat(getComputedStyle(spot).getPropertyValue("--apex-y"));
+  const apex = spot.getBoundingClientRect().top + (Number.isFinite(apexLocal) ? apexLocal : 0.6 * rem);
+  const room = apex - title.getBoundingClientRect().bottom - label.offsetHeight - gap - pad;
+  const stick = Math.max(0.55 * rem, Math.min(full, room));
+  spot.style.setProperty("--stick", `${stick}px`);
 };
 
 if (summitLayer) {

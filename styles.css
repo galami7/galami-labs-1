@@ -221,6 +221,17 @@ body {
   height: 2.45rem;
 }
 
+@media (min-aspect-ratio: 4/5) {
+  .summit-spot:has(.summit-pilatus):hover .summit-line,
+  .summit-spot:has(.summit-pilatus):focus-within .summit-line {
+    height: var(--stick, 2.45rem);
+  }
+
+  .summit-spot:has(.summit-pilatus) .summit-label {
+    transform: translate(-50%, calc(-100% - var(--stick, 2.45rem) - 0.3rem));
+  }
+}
+
 .summit-spot:hover .summit-label,
 .summit-spot:focus-within .summit-label,
 .summit:hover .summit-label,
