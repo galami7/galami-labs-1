@@ -10,7 +10,7 @@
     <link rel="preload" as="image" href="../trial-first.jpg" media="(min-aspect-ratio: 4/5)" />
     <script>
       (function () {
-        var names = { focus: 1, sky: 1, ruler: 1, altitude: 1, peaks: 1 };
+        var names = { focus: 1, sky: 1, ruler: 1, altitude: 1, peaks: 1, sketch: 1, scale: 1 };
         var v = new URLSearchParams(location.search).get("v");
         document.documentElement.dataset.screen = names[v] ? v : "focus";
       })();
@@ -120,7 +120,9 @@
         transform: translateY(calc(50dvh - 14vh - 2.2rem));
       }
 
-      html[data-screen="altitude"]:not(.is-open) .home-lock {
+      html[data-screen="altitude"]:not(.is-open) .home-lock,
+      html[data-screen="sketch"]:not(.is-open) .home-lock,
+      html[data-screen="scale"]:not(.is-open) .home-lock {
         opacity: 0;
       }
 
@@ -182,7 +184,9 @@
 
       .instrument-ruler,
       .instrument-altitude,
-      .instrument-peaks {
+      .instrument-peaks,
+      .instrument-sketch,
+      .instrument-scale {
         display: none;
       }
 
@@ -196,6 +200,11 @@
 
       html[data-screen="peaks"] .instrument-peaks {
         display: block;
+      }
+
+      html[data-screen="sketch"] .instrument-sketch,
+      html[data-screen="scale"] .instrument-scale {
+        display: flex;
       }
 
       .instrument-ruler {
@@ -355,6 +364,133 @@
         color: rgba(255, 255, 255, 0.82);
       }
 
+      .instrument-sketch,
+      .instrument-scale {
+        position: absolute;
+        inset: 0;
+        flex-direction: column;
+        align-items: center;
+        color: #fff;
+      }
+
+      .instrument-sketch {
+        justify-content: center;
+        padding: 8vh 1.25rem 6vh;
+      }
+
+      .instrument-scale {
+        justify-content: space-between;
+        padding: 9vh 0.75rem 2.5vh;
+      }
+
+      .scale-name,
+      .scale-figure,
+      .scale-value,
+      .scale-unit {
+        font-family: system-ui, sans-serif;
+      }
+
+      .scale-name {
+        margin: 0;
+        min-height: 1.2em;
+        font-weight: 500;
+        font-size: 1.05rem;
+        line-height: 1.2;
+        text-align: center;
+      }
+
+      .scale-figure {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        margin: 0.25rem 0 0;
+      }
+
+      .scale-value {
+        display: block;
+        width: 5.2ch;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        font-size: clamp(2.8rem, 11vw, 5rem);
+        line-height: 0.9;
+        letter-spacing: -0.05em;
+      }
+
+      .scale-unit {
+        margin-left: 0.28rem;
+        font-weight: 500;
+        font-size: clamp(1.2rem, 3.4vw, 1.8rem);
+        line-height: 1;
+      }
+
+      .range-svg {
+        display: block;
+        width: auto;
+        height: min(58%, 36rem);
+        max-width: 100%;
+        overflow: visible;
+      }
+
+      .sketch-svg {
+        height: min(64%, 38rem);
+      }
+
+      .sketch-fill {
+        fill: #fff;
+        stroke: none;
+        opacity: clamp(0, calc((var(--p) - 0.78) / 0.22), 1);
+      }
+
+      .draw {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 1.7;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+        stroke-dasharray: 0 1;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .ruler-track {
+        stroke: rgba(255, 255, 255, 0.38);
+        stroke-width: 1.5;
+      }
+
+      .ruler-fill,
+      .vmark line {
+        stroke: #fff;
+        stroke-width: 1.75;
+      }
+
+      .tick {
+        stroke: rgba(255, 255, 255, 0.7);
+        stroke-width: 1.25;
+      }
+
+      .ground {
+        stroke: rgba(255, 255, 255, 0.45);
+        stroke-width: 1.25;
+      }
+
+      .mtn {
+        fill: #fff;
+        stroke: #3f6fc4;
+        stroke-width: 2;
+        stroke-linejoin: round;
+      }
+
+      .range-svg text {
+        fill: #fff;
+        font-family: system-ui, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      .mint {
+        opacity: clamp(0, calc((var(--p) - var(--at)) * 7), 1);
+      }
+
       .dock {
         flex: none;
         padding: 0.75rem 1rem calc(0.8rem + env(safe-area-inset-bottom));
@@ -403,8 +539,8 @@
       }
 
       .pick {
-        width: 2rem;
-        height: 2rem;
+        width: 1.85rem;
+        height: 1.85rem;
         border-radius: 50%;
         color: rgba(255, 255, 255, 0.72);
         font-family: system-ui, sans-serif;
@@ -527,6 +663,53 @@
             <span class="summit-line"></span>
           </div>
         </div>
+        <div class="instrument instrument-sketch" aria-hidden="true">
+          <svg class="range-svg sketch-svg" viewBox="96 20 324 520">
+            <path class="sketch-fill" d="M140 500 C158 456 176 382 196 318.5 C216 386 238 456 264 500 Z" />
+            <path class="sketch-fill" d="M224 500 L242 440 L256 400 L270 428 L290 285.2 L306 348 L322 312 L342 410 L366 500 Z" />
+            <path class="sketch-fill" d="M300 500 L328 320 L342 175 L356 48 L372 180 L390 330 L408 500 Z" />
+            <path class="draw" data-start="0" data-span="0.22" d="M140 500 L408 500" />
+            <path class="draw" data-start="0.04" data-span="0.32" d="M140 500 C158 456 176 382 196 318.5 C216 386 238 456 264 500" />
+            <path class="draw" data-start="0.24" data-span="0.34" d="M224 500 L242 440 L256 400 L270 428 L290 285.2 L306 348 L322 312 L342 410 L366 500" />
+            <path class="draw" data-start="0.5" data-span="0.5" d="M300 500 L328 320 L342 175 L356 48 L372 180 L390 330 L408 500" />
+          </svg>
+        </div>
+        <div class="instrument instrument-scale" aria-hidden="true">
+          <div class="scale-read">
+            <p class="scale-name">Rigi</p>
+            <p class="scale-figure"><span class="scale-value">0</span><span class="scale-unit">m</span></p>
+          </div>
+          <svg class="range-svg" viewBox="0 0 420 540">
+            <line class="ruler-track" x1="108" y1="48" x2="108" y2="500" />
+            <line class="ruler-fill" x1="108" y1="500" x2="108" y2="500" />
+            <line class="tick" x1="104" y1="449.5" x2="112" y2="449.5" />
+            <line class="tick" x1="104" y1="399.1" x2="112" y2="399.1" />
+            <line class="tick" x1="104" y1="348.6" x2="112" y2="348.6" />
+            <line class="tick" x1="104" y1="298.1" x2="112" y2="298.1" />
+            <line class="tick" x1="104" y1="247.7" x2="112" y2="247.7" />
+            <line class="tick" x1="104" y1="197.2" x2="112" y2="197.2" />
+            <line class="tick" x1="104" y1="146.7" x2="112" y2="146.7" />
+            <line class="tick" x1="104" y1="96.3" x2="112" y2="96.3" />
+            <line class="tick" x1="100" y1="318.5" x2="120" y2="318.5" />
+            <line class="tick" x1="100" y1="285.2" x2="120" y2="285.2" />
+            <line class="tick" x1="98" y1="48" x2="122" y2="48" />
+            <line class="ground" x1="130" y1="500" x2="412" y2="500" />
+            <g class="vmark">
+              <line x1="94" y1="48" x2="126" y2="48" />
+            </g>
+            <clipPath id="rise">
+              <rect class="rise-rect" x="0" y="500" width="420" height="0" />
+            </clipPath>
+            <g clip-path="url(#rise)">
+              <path class="mtn" d="M140 500 C158 456 176 382 196 318.5 C216 386 238 456 264 500 Z" />
+              <path class="mtn" d="M224 500 L242 440 L256 400 L270 428 L290 285.2 L306 348 L322 312 L342 410 L366 500 Z" />
+              <path class="mtn" d="M300 500 L328 320 L342 175 L356 48 L372 180 L390 330 L408 500 Z" />
+            </g>
+            <text class="mint" style="--at: 0.4" x="196" y="306" text-anchor="middle">Rigi</text>
+            <text class="mint" style="--at: 0.48" x="290" y="272" text-anchor="middle">Pilatus</text>
+            <text class="mint" style="--at: 0.9" x="188" y="72">Matterhorn</text>
+          </svg>
+        </div>
         <p class="sr" role="status"></p>
       </div>
       <nav class="dock" aria-label="Loading screens">
@@ -539,6 +722,8 @@
             <button type="button" class="pick" role="radio" data-v="ruler" aria-checked="false" aria-label="Ruler">3</button>
             <button type="button" class="pick" role="radio" data-v="altitude" aria-checked="false" aria-label="Altitude">4</button>
             <button type="button" class="pick" role="radio" data-v="peaks" aria-checked="false" aria-label="Peaks">5</button>
+            <button type="button" class="pick" role="radio" data-v="sketch" aria-checked="false" aria-label="Sketch">6</button>
+            <button type="button" class="pick" role="radio" data-v="scale" aria-checked="false" aria-label="Scale">7</button>
           </div>
           <button type="button" class="replay">Replay</button>
         </div>
@@ -546,13 +731,15 @@
     </div>
     <script>
       const root = document.documentElement;
-      const screens = ["focus", "sky", "ruler", "altitude", "peaks"];
+      const screens = ["focus", "sky", "ruler", "altitude", "peaks", "sketch", "scale"];
       const copy = {
         focus: ["Focus", "The first frame sharpens while the animation loads"],
         sky: ["Sky", "A title card on the sky, then the picture"],
         ruler: ["Ruler", "The measure fills, then the scene appears"],
         altitude: ["Altitude", "A climb through Rigi, Pilatus, and the Matterhorn"],
         peaks: ["Peaks", "The three summit labels draw themselves in"],
+        sketch: ["Sketch", "A line draws the three peaks, then fills them in"],
+        scale: ["Scale", "A vertical ruler, with each peak at its true height"],
       };
       const peaks = [
         { name: "Rigi", meters: 1798 },
@@ -567,6 +754,16 @@
       const summits = [...document.querySelectorAll(".summit")];
       const altName = document.querySelector(".alt-name");
       const altValue = document.querySelector(".alt-value");
+      const scaleName = document.querySelector(".scale-name");
+      const scaleValue = document.querySelector(".scale-value");
+      const scaleFill = document.querySelector(".ruler-fill");
+      const scaleMark = document.querySelector(".vmark");
+      const riseRect = document.querySelector(".rise-rect");
+      const drawPaths = [...document.querySelectorAll(".draw")];
+      const rulerTop = 48;
+      const rulerBottom = 500;
+      const rulerSpan = rulerBottom - rulerTop;
+      let drawReady = false;
       const dockName = document.querySelector(".dock-name");
       const dockBlurb = document.querySelector(".dock-blurb");
       const picks = [...document.querySelectorAll(".pick")];
@@ -598,12 +795,40 @@
         return { name: peaks[i].name, meters: from + (peaks[i].meters - from) * eased };
       };
 
+      const ensureDraws = () => {
+        if (drawReady) return;
+        drawPaths.forEach((path) => {
+          const len = path.getTotalLength();
+          if (!len) return;
+          path.dataset.len = String(len);
+          path.style.strokeDasharray = `${len}`;
+        });
+        drawReady = drawPaths.every((path) => Number(path.dataset.len) > 0);
+      };
+
       const setProgress = (amount) => {
         const p = Math.min(1, Math.max(0, amount));
         root.style.setProperty("--p", p.toFixed(4));
         const altitude = altitudeAt(p);
         altName.textContent = altitude.name;
         altValue.textContent = formatMeters(altitude.meters);
+        const metersNow = p >= 1 ? 4478 : p * 4478;
+        scaleValue.textContent = formatMeters(metersNow);
+        scaleName.textContent = metersNow >= 2128 ? "Matterhorn" : metersNow >= 1798 ? "Pilatus" : "Rigi";
+        const level = rulerBottom - p * rulerSpan;
+        scaleFill.setAttribute("y1", level.toFixed(2));
+        scaleMark.setAttribute("transform", `translate(0 ${(level - rulerTop).toFixed(2)})`);
+        riseRect.setAttribute("y", level.toFixed(2));
+        riseRect.setAttribute("height", (rulerBottom - level).toFixed(2));
+        if (root.dataset.screen === "sketch") ensureDraws();
+        drawPaths.forEach((path) => {
+          const len = Number(path.dataset.len);
+          if (!len) return;
+          const start = Number(path.dataset.start);
+          const span = Number(path.dataset.span);
+          const local = Math.min(1, Math.max(0, (p - start) / span));
+          path.style.strokeDashoffset = String(len * (1 - local));
+        });
         summits.forEach((node, index) => {
           const [start, end] = bands[index];
           const grow = Math.min(1, Math.max(0, (p - start) / (end - start)));
