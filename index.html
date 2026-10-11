@@ -166,18 +166,21 @@
           <p class="statement-hint hint-tap">Tap a mountain to explore the peaks</p>
         </div>
         <div class="summits" aria-hidden="true">
-          <button type="button" class="summit" data-x="0.189" data-y="0.329" data-phone-x="0.163" data-phone-y="0.376" aria-label="Rigi, 1,798 meters">
+          <div class="summit-spot">
+            <button type="button" class="summit" data-x="0.189" data-y="0.329" data-phone-x="0.163" data-phone-y="0.376" aria-label="Rigi, 1,798 meters"></button>
             <span class="summit-label"><span class="summit-name">Rigi</span><span class="summit-height">1,798 m</span></span>
             <span class="summit-line"></span>
-          </button>
-          <button type="button" class="summit summit-pilatus" data-x="0.480" data-y="0.273" data-phone-x="0.488" data-phone-y="0.348" aria-label="Pilatus, 2,128 meters">
+          </div>
+          <div class="summit-spot">
+            <button type="button" class="summit summit-pilatus" data-x="0.480" data-y="0.273" data-phone-x="0.488" data-phone-y="0.348" aria-label="Pilatus, 2,128 meters"></button>
             <span class="summit-label"><span class="summit-name">Pilatus</span><span class="summit-height">2,128 m</span></span>
             <span class="summit-line"></span>
-          </button>
-          <button type="button" class="summit" data-x="0.815" data-y="0.222" data-phone-x="0.834" data-phone-y="0.326" aria-label="Matterhorn, 4,478 meters">
+          </div>
+          <div class="summit-spot">
+            <button type="button" class="summit" data-x="0.815" data-y="0.222" data-phone-x="0.834" data-phone-y="0.326" aria-label="Matterhorn, 4,478 meters"></button>
             <span class="summit-label"><span class="summit-name">Matterhorn</span><span class="summit-height">4,478 m</span></span>
             <span class="summit-line"></span>
-          </button>
+          </div>
         </div>
         <div class="peak-readout" hidden>
           <span class="peak-readout-live"></span>
@@ -221,6 +224,7 @@
         </button>
       </div>
     </main>
+    <script src="summit-shapes.js"></script>
     <script src="scrub.js"></script>
     <script>
       const homePin = document.querySelector(".home");

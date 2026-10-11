@@ -480,9 +480,42 @@ const placeSummits = () => {
   const offsetY = (viewH - drawnH) / 2;
   const markerX = (marker) => Number(isPhone() && marker.dataset.phoneX ? marker.dataset.phoneX : marker.dataset.x);
   const markerY = (marker) => Number(isPhone() && marker.dataset.phoneY ? marker.dataset.phoneY : marker.dataset.y);
-  summitLayer.querySelectorAll(".summit").forEach((marker) => {
-    marker.style.left = `${offsetX + markerX(marker) * drawnW}px`;
-    marker.style.top = `${offsetY + markerY(marker) * drawnH}px`;
+  const shapes = window.galamiSummitTriangles;
+  const triangles = shapes && !isPhone() ? shapes.read() : null;
+  summitLayer.querySelectorAll(".summit").forEach((marker, index) => {
+    const spot = marker.parentElement && marker.parentElement.classList.contains("summit-spot") ? marker.parentElement : null;
+    const triangle = triangles && triangles[index];
+    if (spot && triangle) {
+      const pts = triangle.map(([x, y]) => [offsetX + x * drawnW, offsetY + y * drawnH]);
+      const minX = Math.min(...pts.map((point) => point[0]));
+      const minY = Math.min(...pts.map((point) => point[1]));
+      const width = Math.max(1, Math.max(...pts.map((point) => point[0])) - minX);
+      const height = Math.max(1, Math.max(...pts.map((point) => point[1])) - minY);
+      spot.style.left = `${minX}px`;
+      spot.style.top = `${minY}px`;
+      spot.style.width = `${width}px`;
+      spot.style.height = `${height}px`;
+      spot.style.transform = "none";
+      const polygon = pts
+        .map(([x, y]) => `${((x - minX) / width) * 100}% ${((y - minY) / height) * 100}%`)
+        .join(", ");
+      marker.style.clipPath = `polygon(${polygon})`;
+      marker.style.webkitClipPath = `polygon(${polygon})`;
+      spot.style.setProperty("--apex-x", `${pts[0][0] - minX}px`);
+      spot.style.setProperty("--apex-y", `${pts[0][1] - minY}px`);
+      return;
+    }
+    const host = spot || marker;
+    host.style.left = `${offsetX + markerX(marker) * drawnW}px`;
+    host.style.top = `${offsetY + markerY(marker) * drawnH}px`;
+    if (!spot) return;
+    host.style.width = "";
+    host.style.height = "";
+    host.style.transform = "";
+    host.style.removeProperty("--apex-x");
+    host.style.removeProperty("--apex-y");
+    marker.style.clipPath = "";
+    marker.style.webkitClipPath = "";
   });
   const along = (nx) => `${offsetX + nx * drawnW}px`;
   if (nextButton) nextButton.style.left = along(isPhone() ? 0.5 : 0.516);
@@ -494,6 +527,9 @@ if (summitLayer) {
   if (endStill.complete && endStill.naturalWidth) placeSummits();
   endStill.addEventListener("load", placeSummits);
   window.addEventListener("resize", placeSummits);
+  window.addEventListener("storage", (event) => {
+    if (event.key === (window.galamiSummitTriangles && window.galamiSummitTriangles.key)) placeSummits();
+  });
 }
 
 function syncPeaks() {
@@ -508,6 +544,7 @@ function syncPeaks() {
     const menuOpen = onFinal && moreFog && !moreFog.hidden;
     peakExit.hidden = !open;
     peakExit.classList.toggle("is-more", onFinal);
+    peakExit.classList.toggle("is-open", menuOpen);
     peakExit.setAttribute("aria-label", onFinal ? (menuOpen ? "Close" : "More") : "Back to the mountains");
     if (onFinal) peakExit.setAttribute("aria-expanded", menuOpen ? "true" : "false");
     else peakExit.removeAttribute("aria-expanded");

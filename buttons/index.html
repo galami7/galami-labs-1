@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Down button — Galami Labs</title>
+    <style>
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #3f6fc4;
+        color: #fff;
+      }
+
+      body {
+        min-height: 100dvh;
+      }
+
+      .still {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .wordmark {
+        position: absolute;
+        z-index: 1;
+        top: calc(14vh + 0.475 * clamp(4.2rem, 10.5vw, 9.5rem));
+        left: 0;
+        right: 0;
+        margin: 0;
+        color: #fff;
+        text-align: center;
+        font-family: system-ui, sans-serif;
+        font-weight: 500;
+        font-size: clamp(4.6rem, 11.4vw, 10.3rem);
+        line-height: 0.95;
+        white-space: nowrap;
+        letter-spacing: -0.045em;
+        pointer-events: none;
+        transform: translateY(-50%);
+      }
+
+      .back {
+        position: fixed;
+        z-index: 2;
+        top: 1.15rem;
+        left: 1.15rem;
+        color: #fff;
+        font: 400 0.92rem/1 system-ui, sans-serif;
+        text-shadow: 0 1px 8px rgba(8, 28, 64, 0.45);
+      }
+
+      .row {
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        bottom: calc(1.7rem + env(safe-area-inset-bottom));
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 1.35rem;
+        width: min(72rem, calc(100% - 2rem));
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        transform: translateX(-50%);
+      }
+
+      .row li {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.55rem;
+      }
+
+      .slot {
+        display: grid;
+        place-items: center;
+        width: 4.4rem;
+        height: 4.4rem;
+      }
+
+      .down {
+        display: grid;
+        place-items: center;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: #141414;
+        cursor: pointer;
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .down:hover,
+      .down:focus-visible {
+        transform: scale(1.12);
+      }
+
+      .down svg {
+        display: block;
+        animation: bob 1.4s ease-in-out infinite;
+      }
+
+      .disc,
+      .ring,
+      .arrow,
+      .glass,
+      .small {
+        border-radius: 50%;
+      }
+
+      .disc,
+      .arrow {
+        width: 3.25rem;
+        height: 3.25rem;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
+      }
+
+      .disc svg,
+      .arrow svg,
+      .ring svg,
+      .glass svg {
+        width: 1.45rem;
+        height: 1.45rem;
+      }
+
+      .ring {
+        width: 3.25rem;
+        height: 3.25rem;
+        background: transparent;
+        color: #fff;
+        box-shadow: inset 0 0 0 1.5px #fff;
+      }
+
+      .twin {
+        width: 2.4rem;
+        height: 2.6rem;
+        color: #fff;
+      }
+
+      .twin svg {
+        width: 1.7rem;
+        height: 1.85rem;
+      }
+
+      .glass {
+        width: 3.25rem;
+        height: 3.25rem;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(14px) saturate(1.2);
+        -webkit-backdrop-filter: blur(14px) saturate(1.2);
+      }
+
+      .small {
+        width: 2.35rem;
+        height: 2.35rem;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
+      }
+
+      .small svg {
+        width: 1.05rem;
+        height: 1.05rem;
+      }
+
+      .stem {
+        width: 1.7rem;
+        height: 3.1rem;
+        color: #fff;
+      }
+
+      .stem svg {
+        width: 1.35rem;
+        height: 2.55rem;
+      }
+
+      .pill {
+        width: 4.5rem;
+        height: 2.55rem;
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(8, 28, 64, 0.18);
+      }
+
+      .pill svg {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      .bare {
+        width: 2.6rem;
+        height: 2.2rem;
+        color: #fff;
+      }
+
+      .bare svg {
+        width: 2.15rem;
+        height: 1.45rem;
+      }
+
+      .wedge {
+        width: 2.7rem;
+        height: 2.15rem;
+        color: #fff;
+        filter: drop-shadow(0 8px 16px rgba(8, 28, 64, 0.18));
+      }
+
+      .wedge svg {
+        width: 2.35rem;
+        height: 1.7rem;
+      }
+
+      figcaption, .row li span {
+        font: 500 0.68rem/1 system-ui, sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #fff;
+        text-shadow: 0 1px 8px rgba(8, 28, 64, 0.45);
+      }
+
+      @keyframes bob {
+        50% { transform: translateY(3px); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .down,
+        .down svg {
+          transition: none;
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <img class="still" src="../trial-first.jpg" alt="" draggable="false" />
+    <h1 class="wordmark">Galami Labs</h1>
+    <a class="back" href="../">Site</a>
+    <ul class="row">
+      <li>
+        <div class="slot">
+          <button type="button" class="down disc" aria-label="Disc">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Disc</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down ring" aria-label="Ring">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Ring</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down arrow" aria-label="Arrow">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v10M7.5 11.5L12 16.5l4.5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Arrow</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down twin" aria-label="Twin">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6.5l6 5.5 6-5.5M6 12.5l6 5.5 6-5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Twin</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down glass" aria-label="Glass">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Glass</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down small" aria-label="Small">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Small</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down stem" aria-label="Stem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7 11.5L12 17l5-5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Stem</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down pill" aria-label="Pill">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Pill</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down bare" aria-label="Chevron">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l8 8 8-8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </div>
+        <span>Chevron</span>
+      </li>
+      <li>
+        <div class="slot">
+          <button type="button" class="down wedge" aria-label="Triangle">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5L4.2 6.5h15.6L12 18.5z" fill="currentColor" /></svg>
+          </button>
+        </div>
+        <span>Triangle</span>
+      </li>
+    </ul>
+  </body>
+</html>

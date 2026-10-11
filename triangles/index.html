@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Triangles — Galami Labs</title>
+    <script src="../summit-shapes.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #3f6fc4;
+        color: #fff;
+        font-family: system-ui, sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      .still {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .map {
+        position: fixed;
+        overflow: visible;
+      }
+
+      .map polygon {
+        fill: rgba(255, 255, 255, 0.16);
+        stroke: rgba(255, 255, 255, 0.95);
+        stroke-width: 1.5px;
+        vector-effect: non-scaling-stroke;
+        cursor: grab;
+      }
+
+      .map polygon.is-hot {
+        fill: rgba(255, 255, 255, 0.3);
+      }
+
+      .handle {
+        position: fixed;
+        z-index: 3;
+        width: 0.95rem;
+        height: 0.95rem;
+        margin: -0.475rem 0 0 -0.475rem;
+        padding: 0;
+        border: 1.5px solid #fff;
+        border-radius: 50%;
+        background: rgba(20, 20, 20, 0.28);
+        box-shadow: 0 1px 8px rgba(8, 28, 64, 0.35);
+        cursor: grab;
+        touch-action: none;
+      }
+
+      .handle.is-apex {
+        background: #fff;
+      }
+
+      .handle:active,
+      .map polygon:active {
+        cursor: grabbing;
+      }
+
+      .tag {
+        position: fixed;
+        z-index: 2;
+        text-align: center;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(-50%, calc(-100% - 2.75rem));
+      }
+
+      .tag.is-on {
+        opacity: 1;
+      }
+
+      .tag-name,
+      .tag-height {
+        display: block;
+        color: #fff;
+        text-shadow: 0 1px 8px rgba(8, 28, 64, 0.4);
+      }
+
+      .tag-name {
+        font: 500 0.95rem/1.15 system-ui, sans-serif;
+      }
+
+      .tag-height {
+        margin-top: 0.15rem;
+        font: 400 0.78rem/1 system-ui, sans-serif;
+      }
+
+      .tag-line {
+        position: fixed;
+        z-index: 2;
+        width: 1px;
+        height: 0;
+        background: rgba(255, 255, 255, 0.92);
+        pointer-events: none;
+        transform: translate(-50%, -100%);
+        transition: height 0.35s ease;
+      }
+
+      .tag-line.is-on {
+        height: 2.45rem;
+      }
+
+      .note {
+        position: fixed;
+        z-index: 4;
+        top: 1.15rem;
+        left: 1.15rem;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin: 0;
+        color: #fff;
+        font: 400 0.92rem/1.35 system-ui, sans-serif;
+        text-shadow: 0 1px 8px rgba(8, 28, 64, 0.45);
+      }
+
+      .note button,
+      .back {
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-decoration: underline;
+        text-underline-offset: 0.18em;
+        cursor: pointer;
+        text-shadow: inherit;
+      }
+
+      .readout {
+        position: fixed;
+        z-index: 4;
+        left: 1.15rem;
+        bottom: 1.15rem;
+        margin: 0;
+        font: 400 0.78rem/1.45 ui-monospace, monospace;
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1px 8px rgba(8, 28, 64, 0.45);
+      }
+    </style>
+  </head>
+  <body>
+    <img class="still" src="../Final Middle Frame.jpg" alt="A boy standing in a meadow, looking at the mountains" draggable="false" />
+    <svg class="map" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+    <p class="note">
+      Drag the corners. The white point is where the name sits.
+      <button type="button" id="reset">Reset</button>
+      <a class="back" href="../">Site</a>
+    </p>
+    <p class="readout" id="readout"></p>
+    <script>
+      const shapes = window.galamiSummitTriangles;
+      const still = document.querySelector(".still");
+      const map = document.querySelector(".map");
+      const readout = document.getElementById("readout");
+      const heights = ["1,798 m", "2,128 m", "4,478 m"];
+      let points = shapes.read();
+      let hot = -1;
+      let drag = null;
+
+      const clamp = (value) => Math.min(0.98, Math.max(0.02, value));
+
+      const frame = () => {
+        const viewW = window.innerWidth;
+        const viewH = window.innerHeight;
+        const scale = Math.max(viewW / still.naturalWidth, viewH / still.naturalHeight);
+        const drawnW = still.naturalWidth * scale;
+        const drawnH = still.naturalHeight * scale;
+        return {
+          left: (viewW - drawnW) / 2,
+          top: (viewH - drawnH) / 2,
+          width: drawnW,
+          height: drawnH,
+        };
+      };
+
+      const placeMap = () => {
+        const box = frame();
+        map.style.left = `${box.left}px`;
+        map.style.top = `${box.top}px`;
+        map.style.width = `${box.width}px`;
+        map.style.height = `${box.height}px`;
+      };
+
+      const pixel = (pair) => {
+        const box = map.getBoundingClientRect();
+        return [box.left + pair[0] * box.width, box.top + pair[1] * box.height];
+      };
+
+      const paint = () => {
+        placeMap();
+        map.replaceChildren();
+        document.querySelectorAll(".handle, .tag, .tag-line").forEach((node) => node.remove());
+        points.forEach((triangle, index) => {
+          const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+          polygon.setAttribute("points", triangle.map((pair) => pair.join(",")).join(" "));
+          polygon.classList.toggle("is-hot", hot === index);
+          polygon.dataset.index = String(index);
+          map.append(polygon);
+          triangle.forEach((pair, point) => {
+            const [x, y] = pixel(pair);
+            const handle = document.createElement("button");
+            handle.type = "button";
+            handle.className = "handle" + (point === 0 ? " is-apex" : "");
+            handle.style.left = `${x}px`;
+            handle.style.top = `${y}px`;
+            handle.dataset.index = String(index);
+            handle.dataset.point = String(point);
+            handle.setAttribute("aria-label", `${shapes.names[index]} corner ${point + 1}`);
+            document.body.append(handle);
+          });
+          const [x, y] = pixel(triangle[0]);
+          const line = document.createElement("span");
+          line.className = "tag-line" + (hot === index ? " is-on" : "");
+          line.style.left = `${x}px`;
+          line.style.top = `${y}px`;
+          const tag = document.createElement("span");
+          tag.className = "tag" + (hot === index ? " is-on" : "");
+          tag.style.left = `${x}px`;
+          tag.style.top = `${y}px`;
+          tag.innerHTML = `<span class="tag-name">${shapes.names[index]}</span><span class="tag-height">${heights[index]}</span>`;
+          document.body.append(line, tag);
+        });
+        readout.textContent = points.map((triangle, index) => {
+          const bits = triangle.map((pair) => pair.map((value) => value.toFixed(3)).join(" ")).join("   ");
+          return `${shapes.names[index]}  ${bits}`;
+        }).join("\n");
+      };
+
+      const fromEvent = (event) => {
+        const box = map.getBoundingClientRect();
+        return [
+          clamp((event.clientX - box.left) / box.width),
+          clamp((event.clientY - box.top) / box.height),
+        ];
+      };
+
+      document.addEventListener("pointerover", (event) => {
+        const node = event.target.closest("[data-index]");
+        const next = node ? Number(node.dataset.index) : -1;
+        if (next === hot) return;
+        hot = next;
+        paint();
+      });
+
+      document.addEventListener("pointerdown", (event) => {
+        const handle = event.target.closest(".handle");
+        const polygon = event.target.closest("polygon");
+        if (!handle && !polygon) return;
+        const index = Number((handle || polygon).dataset.index);
+        const point = handle ? Number(handle.dataset.point) : nearestPoint(index, event);
+        drag = { index, point };
+        hot = index;
+        event.preventDefault();
+      });
+
+      const nearestPoint = (index, event) => {
+        const [x, y] = fromEvent(event);
+        let best = 0;
+        let score = Infinity;
+        points[index].forEach((pair, point) => {
+          const next = (pair[0] - x) ** 2 + (pair[1] - y) ** 2;
+          if (next < score) {
+            score = next;
+            best = point;
+          }
+        });
+        return best;
+      };
+
+      document.addEventListener("pointermove", (event) => {
+        if (!drag) return;
+        points[drag.index][drag.point] = fromEvent(event);
+        shapes.save(points);
+        paint();
+      });
+
+      const endDrag = () => {
+        drag = null;
+      };
+
+      document.addEventListener("pointerup", endDrag);
+      document.addEventListener("pointercancel", endDrag);
+
+      document.getElementById("reset").addEventListener("click", () => {
+        shapes.clear();
+        points = shapes.read();
+        paint();
+      });
+
+      window.addEventListener("resize", paint);
+      if (still.complete && still.naturalWidth) paint();
+      else still.addEventListener("load", paint);
+    </script>
+  </body>
+</html>
