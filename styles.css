@@ -415,7 +415,7 @@ body {
 .contact-card {
   position: absolute;
   top: 25.5%;
-  left: 12%;
+  left: calc((var(--frame) - 100cqi) / 2 + 12cqi);
   height: auto;
   display: flex;
   flex-direction: column;
