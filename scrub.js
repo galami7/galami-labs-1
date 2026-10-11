@@ -495,6 +495,8 @@ const placeSummits = () => {
       spot.style.top = `${minY}px`;
       spot.style.width = `${width}px`;
       spot.style.height = `${height}px`;
+      spot.style.minWidth = "0";
+      spot.style.minHeight = "0";
       spot.style.transform = "none";
       const polygon = pts
         .map(([x, y]) => `${((x - minX) / width) * 100}% ${((y - minY) / height) * 100}%`)
@@ -511,6 +513,8 @@ const placeSummits = () => {
     if (!spot) return;
     host.style.width = "";
     host.style.height = "";
+    host.style.minWidth = "";
+    host.style.minHeight = "";
     host.style.transform = "";
     host.style.removeProperty("--apex-x");
     host.style.removeProperty("--apex-y");

@@ -190,6 +190,10 @@ body {
 
 .summit-spot {
   position: absolute;
+  width: 18vw;
+  min-width: 10rem;
+  height: 34vh;
+  transform: translate(-50%, -0.6rem);
   pointer-events: none;
 }
 

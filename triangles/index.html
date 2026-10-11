@@ -151,6 +151,7 @@
         margin: 0;
         font: 400 0.78rem/1.45 ui-monospace, monospace;
         color: rgba(255, 255, 255, 0.9);
+        white-space: pre-line;
         text-shadow: 0 1px 8px rgba(8, 28, 64, 0.45);
       }
     </style>
@@ -173,6 +174,10 @@
       let points = shapes.read();
       let hot = -1;
       let drag = null;
+      const polygons = [];
+      const handles = [];
+      const tags = [];
+      const lines = [];
 
       const clamp = (value) => Math.min(0.98, Math.max(0.02, value));
 
@@ -203,39 +208,51 @@
         return [box.left + pair[0] * box.width, box.top + pair[1] * box.height];
       };
 
-      const paint = () => {
-        placeMap();
-        map.replaceChildren();
-        document.querySelectorAll(".handle, .tag, .tag-line").forEach((node) => node.remove());
+      const build = () => {
         points.forEach((triangle, index) => {
           const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-          polygon.setAttribute("points", triangle.map((pair) => pair.join(",")).join(" "));
-          polygon.classList.toggle("is-hot", hot === index);
           polygon.dataset.index = String(index);
           map.append(polygon);
+          polygons.push(polygon);
           triangle.forEach((pair, point) => {
-            const [x, y] = pixel(pair);
             const handle = document.createElement("button");
             handle.type = "button";
             handle.className = "handle" + (point === 0 ? " is-apex" : "");
-            handle.style.left = `${x}px`;
-            handle.style.top = `${y}px`;
             handle.dataset.index = String(index);
             handle.dataset.point = String(point);
             handle.setAttribute("aria-label", `${shapes.names[index]} corner ${point + 1}`);
             document.body.append(handle);
+            handles.push(handle);
           });
-          const [x, y] = pixel(triangle[0]);
           const line = document.createElement("span");
-          line.className = "tag-line" + (hot === index ? " is-on" : "");
-          line.style.left = `${x}px`;
-          line.style.top = `${y}px`;
+          line.className = "tag-line";
           const tag = document.createElement("span");
-          tag.className = "tag" + (hot === index ? " is-on" : "");
-          tag.style.left = `${x}px`;
-          tag.style.top = `${y}px`;
+          tag.className = "tag";
           tag.innerHTML = `<span class="tag-name">${shapes.names[index]}</span><span class="tag-height">${heights[index]}</span>`;
           document.body.append(line, tag);
+          lines.push(line);
+          tags.push(tag);
+        });
+      };
+
+      const paint = () => {
+        placeMap();
+        points.forEach((triangle, index) => {
+          polygons[index].setAttribute("points", triangle.map((pair) => pair.join(",")).join(" "));
+          polygons[index].classList.toggle("is-hot", hot === index);
+          triangle.forEach((pair, point) => {
+            const [x, y] = pixel(pair);
+            const handle = handles[index * 3 + point];
+            handle.style.left = `${x}px`;
+            handle.style.top = `${y}px`;
+          });
+          const [x, y] = pixel(triangle[0]);
+          lines[index].style.left = `${x}px`;
+          lines[index].style.top = `${y}px`;
+          lines[index].classList.toggle("is-on", hot === index);
+          tags[index].style.left = `${x}px`;
+          tags[index].style.top = `${y}px`;
+          tags[index].classList.toggle("is-on", hot === index);
         });
         readout.textContent = points.map((triangle, index) => {
           const bits = triangle.map((pair) => pair.map((value) => value.toFixed(3)).join(" ")).join("   ");
@@ -252,6 +269,7 @@
       };
 
       document.addEventListener("pointerover", (event) => {
+        if (drag) return;
         const node = event.target.closest("[data-index]");
         const next = node ? Number(node.dataset.index) : -1;
         if (next === hot) return;
@@ -264,29 +282,30 @@
         const polygon = event.target.closest("polygon");
         if (!handle && !polygon) return;
         const index = Number((handle || polygon).dataset.index);
-        const point = handle ? Number(handle.dataset.point) : nearestPoint(index, event);
-        drag = { index, point };
+        if (handle) {
+          drag = { index, point: Number(handle.dataset.point) };
+        } else {
+          drag = {
+            index,
+            origin: fromEvent(event),
+            base: points[index].map((pair) => pair.slice()),
+          };
+        }
         hot = index;
+        paint();
         event.preventDefault();
       });
 
-      const nearestPoint = (index, event) => {
-        const [x, y] = fromEvent(event);
-        let best = 0;
-        let score = Infinity;
-        points[index].forEach((pair, point) => {
-          const next = (pair[0] - x) ** 2 + (pair[1] - y) ** 2;
-          if (next < score) {
-            score = next;
-            best = point;
-          }
-        });
-        return best;
-      };
-
       document.addEventListener("pointermove", (event) => {
         if (!drag) return;
-        points[drag.index][drag.point] = fromEvent(event);
+        if (drag.point != null) {
+          points[drag.index][drag.point] = fromEvent(event);
+        } else {
+          const [x, y] = fromEvent(event);
+          const dx = x - drag.origin[0];
+          const dy = y - drag.origin[1];
+          points[drag.index] = drag.base.map((pair) => [clamp(pair[0] + dx), clamp(pair[1] + dy)]);
+        }
         shapes.save(points);
         paint();
       });
@@ -304,6 +323,7 @@
         paint();
       });
 
+      build();
       window.addEventListener("resize", paint);
       if (still.complete && still.naturalWidth) paint();
       else still.addEventListener("load", paint);
