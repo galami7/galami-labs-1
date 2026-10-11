@@ -1037,6 +1037,22 @@ body {
   right: calc(1.25rem + env(safe-area-inset-right));
 }
 
+.step-prev svg {
+  animation: nudge-left 1.4s ease-in-out infinite;
+}
+
+.step-next svg {
+  animation: nudge-right 1.4s ease-in-out infinite;
+}
+
+@keyframes nudge-left {
+  50% { transform: translateX(-3px); }
+}
+
+@keyframes nudge-right {
+  50% { transform: translateX(3px); }
+}
+
 @keyframes bob {
   50% {
     transform: translateY(3px);
@@ -1267,6 +1283,7 @@ body {
   .summits,
   .height-reel,
   .step,
+  .step svg,
   .replay,
   .peak-exit,
   .more-fog,

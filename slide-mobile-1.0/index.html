@@ -353,10 +353,28 @@
       .step-prev { left: calc(0.85rem + env(safe-area-inset-left)); }
       .step-next { right: calc(0.85rem + env(safe-area-inset-right)); }
 
+      .step-prev svg {
+        animation: nudge-left 1.4s ease-in-out infinite;
+      }
+
+      .step-next svg {
+        animation: nudge-right 1.4s ease-in-out infinite;
+      }
+
+      @keyframes nudge-left {
+        50% { transform: translateX(-3px); }
+      }
+
+      @keyframes nudge-right {
+        50% { transform: translateX(3px); }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .strip,
-        .notes {
+        .notes,
+        .step svg {
           transition: none;
+          animation: none;
         }
       }
     </style>
