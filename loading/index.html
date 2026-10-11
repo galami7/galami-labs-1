@@ -424,12 +424,17 @@
         line-height: 1;
       }
 
+      .range-frame {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+
       .range-svg {
         display: block;
         width: 100%;
-        min-width: 0;
+        max-width: 100%;
         height: auto;
-        align-self: center;
       }
 
       .sketch-fill {
@@ -660,6 +665,7 @@
           </div>
         </div>
         <div class="instrument instrument-sketch" aria-hidden="true">
+          <div class="range-frame">
           <svg class="range-svg sketch-svg" viewBox="70 8 540 532">
             <path class="sketch-fill" d="M96 500 C140 478 162 400 178 348 C188 318.5 198 318.5 208 348 C228 410 258 478 300 500 Z" />
             <path class="sketch-fill" d="M248 500 L272 445 L294 385 L312 418 L348 285.2 L378 358 L398 322 L432 445 L468 500 Z" />
@@ -669,12 +675,14 @@
             <path class="draw" data-start="0.26" data-span="0.32" d="M248 500 L272 445 L294 385 L312 418 L348 285.2 L378 358 L398 322 L432 445 L468 500" />
             <path class="draw" data-start="0.5" data-span="0.5" d="M430 500 L470 390 L500 250 L522 140 L536 48 L554 160 L574 300 L598 500" />
           </svg>
+          </div>
         </div>
         <div class="instrument instrument-scale" aria-hidden="true">
           <div class="scale-read">
             <p class="scale-name">Rigi</p>
             <p class="scale-figure"><span class="scale-value">0</span><span class="scale-unit">m</span></p>
           </div>
+          <div class="range-frame">
           <svg class="range-svg" viewBox="0 0 620 540">
             <line class="ruler-track" x1="36" y1="48" x2="36" y2="500" />
             <line class="ruler-fill" x1="36" y1="500" x2="36" y2="500" />
@@ -705,6 +713,7 @@
             <text class="mint" style="--at: 0.44" x="348" y="270" text-anchor="middle">Pilatus</text>
             <text class="mint" style="--at: 0.78" x="470" y="78" text-anchor="end">Matterhorn</text>
           </svg>
+          </div>
         </div>
         <p class="sr" role="status"></p>
       </div>
@@ -825,6 +834,13 @@
           const local = Math.min(1, Math.max(0, (p - start) / span));
           path.style.strokeDashoffset = String(len * (1 - local));
         });
+        if (root.dataset.screen === "scale" || root.dataset.screen === "sketch") {
+          const svg = document.querySelector(`.instrument-${root.dataset.screen} .range-svg`);
+          const frame = document.querySelector(`.instrument-${root.dataset.screen} .range-frame`);
+          const box = svg.getBoundingClientRect();
+          const frameBox = frame.getBoundingClientRect();
+          dockBlurb.textContent = `svg ${Math.round(box.width)}x${Math.round(box.height)} frame ${Math.round(frameBox.width)} stage ${document.querySelector(".stage").clientWidth}`;
+        }
         summits.forEach((node, index) => {
           const [start, end] = bands[index];
           const grow = Math.min(1, Math.max(0, (p - start) / (end - start)));
