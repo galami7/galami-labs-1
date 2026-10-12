@@ -322,7 +322,7 @@
             const wait = (reduceMotion ? 0 : 560) - (performance.now() - started);
             if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
             if (!response.ok) throw new Error("save");
-            const message = payload.already ? "You're already on the list." : "You're on the list.";
+            const message = payload.already ? "Already on the list." : "You're on the list.";
             if (note) note.textContent = message;
             if (done) done.setAttribute("aria-hidden", "false");
             if (status) {
