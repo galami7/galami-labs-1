@@ -143,7 +143,7 @@
                       </span>
                       <button type="submit">Join</button>
                     </div>
-                    <p class="contact-status" hidden></p>
+                    <p class="contact-status" hidden aria-live="polite"></p>
                   </form>
                 </div>
               </div>
@@ -277,17 +277,41 @@
 
       const emailForm = document.querySelector(".contact-email");
       if (emailForm) {
-        emailForm.addEventListener("submit", (event) => {
+        const signupUrl = "https://xjyofufpgpbindobcchd.supabase.co/rest/v1/expedition_signups";
+        const signupKey = "sb_publishable_6xSDdeOqDHnWbmpThVLh0A_BdlEo-0v";
+        emailForm.addEventListener("submit", async (event) => {
           event.preventDefault();
-          const email = new FormData(emailForm).get("email").trim();
+          const email = String(new FormData(emailForm).get("email") || "").trim();
           const status = emailForm.querySelector(".contact-status");
+          const button = emailForm.querySelector("button");
           if (!email) return;
-          const mail = `mailto:guillaume.gruyters@gmail.com?subject=${encodeURIComponent("Join the Expedition")}&body=${encodeURIComponent(email)}`;
-          window.location.href = mail;
-          emailForm.reset();
+          if (button) button.disabled = true;
           if (status) {
             status.hidden = false;
-            status.textContent = "That opens in your mail app.";
+            status.textContent = "Saving…";
+          }
+          try {
+            const response = await fetch(signupUrl, {
+              method: "POST",
+              headers: {
+                apikey: signupKey,
+                "Content-Type": "application/json",
+                Prefer: "return=minimal",
+              },
+              body: JSON.stringify({ email }),
+            });
+            if (response.ok || response.status === 409) {
+              emailForm.reset();
+              if (status) {
+                status.textContent = response.status === 409 ? "You're already on the list." : "You're on the list.";
+              }
+            } else if (status) {
+              status.textContent = "That didn't save. Try again.";
+            }
+          } catch {
+            if (status) status.textContent = "That didn't save. Try again.";
+          } finally {
+            if (button) button.disabled = false;
           }
         });
       }

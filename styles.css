@@ -637,6 +637,12 @@ body {
   transform: translateY(-0.38rem) scale(1.05);
 }
 
+.contact-email button:disabled {
+  cursor: progress;
+  opacity: 0.72;
+  transform: none;
+}
+
 .contact-more {
   margin-top: 2.35rem;
   font-weight: 500;

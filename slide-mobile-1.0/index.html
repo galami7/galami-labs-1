@@ -191,6 +191,11 @@
         cursor: pointer;
       }
 
+      .contact-email button:disabled {
+        cursor: progress;
+        opacity: 0.72;
+      }
+
       .contact-status {
         margin: 0.55rem 0 0;
         font: 400 0.82rem/1.3 system-ui, sans-serif;
@@ -370,7 +375,7 @@
                 <input id="expedition-email" type="email" name="email" required autocomplete="email" placeholder="Your email" />
                 <button type="submit">Join</button>
               </div>
-              <p class="contact-status" hidden></p>
+              <p class="contact-status" hidden aria-live="polite"></p>
             </form>
           </div>
           <a class="next-peak" href="https://www.guillaumegruyters.com/" target="_blank" rel="noreferrer">
@@ -472,16 +477,39 @@
         if (event.key === "ArrowLeft") show(index - 1);
       });
 
-      document.querySelector(".contact-email").addEventListener("submit", (event) => {
+      const emailForm = document.querySelector(".contact-email");
+      const signupUrl = "https://xjyofufpgpbindobcchd.supabase.co/rest/v1/expedition_signups";
+      const signupKey = "sb_publishable_6xSDdeOqDHnWbmpThVLh0A_BdlEo-0v";
+      emailForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const email = new FormData(event.currentTarget).get("email").trim();
+        const email = String(new FormData(emailForm).get("email") || "").trim();
+        const status = emailForm.querySelector(".contact-status");
+        const button = emailForm.querySelector("button");
         if (!email) return;
-        const mail = `mailto:guillaume.gruyters@gmail.com?subject=${encodeURIComponent("Join the Expedition")}&body=${encodeURIComponent(email)}`;
-        window.location.href = mail;
-        event.currentTarget.reset();
-        const status = event.currentTarget.querySelector(".contact-status");
+        if (button) button.disabled = true;
         status.hidden = false;
-        status.textContent = "That opens in your mail app.";
+        status.textContent = "Saving…";
+        try {
+          const response = await fetch(signupUrl, {
+            method: "POST",
+            headers: {
+              apikey: signupKey,
+              "Content-Type": "application/json",
+              Prefer: "return=minimal",
+            },
+            body: JSON.stringify({ email }),
+          });
+          if (response.ok || response.status === 409) {
+            emailForm.reset();
+            status.textContent = response.status === 409 ? "You're already on the list." : "You're on the list.";
+          } else {
+            status.textContent = "That didn't save. Try again.";
+          }
+        } catch {
+          status.textContent = "That didn't save. Try again.";
+        } finally {
+          if (button) button.disabled = false;
+        }
       });
 
       chrome();
