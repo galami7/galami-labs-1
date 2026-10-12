@@ -562,6 +562,7 @@ body {
   display: flex;
   gap: 0.5rem;
   width: 100%;
+  transition: gap 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @property --turn {
@@ -572,11 +573,16 @@ body {
 
 .contact-email-field {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
   width: 0;
   min-width: 0;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
+  transition:
+    flex-basis 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    max-width 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease;
 }
 
 .contact-email-field::before {
@@ -621,7 +627,13 @@ body {
 }
 
 .contact-email button {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  min-width: 4.7rem;
   padding: 0.72rem 1.05rem;
+  overflow: hidden;
   border: 0;
   border-radius: 999px;
   background: #fff;
@@ -629,18 +641,155 @@ body {
   font: 500 0.95rem/1 system-ui, sans-serif;
   text-shadow: none;
   cursor: pointer;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    flex-grow 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.62s ease;
 }
 
-.contact-email button:hover,
-.contact-email button:focus-visible {
+.join-face,
+.join-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.join-face {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.join-label,
+.join-spin {
+  grid-area: 1 / 1;
+}
+
+.join-label {
+  transition: opacity 0.2s ease;
+}
+
+.join-spin {
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1.5px solid transparent;
+  border-top-color: #141414;
+  border-right-color: rgba(20, 20, 20, 0.28);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.join-done {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  white-space: nowrap;
+}
+
+.join-check {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+}
+
+.join-check path {
+  stroke-dasharray: 28;
+  stroke-dashoffset: 28;
+}
+
+.contact-email button:hover:not(:disabled),
+.contact-email button:focus-visible:not(:disabled) {
   transform: translateY(-0.38rem) scale(1.05);
 }
 
 .contact-email button:disabled {
   cursor: progress;
-  opacity: 0.72;
   transform: none;
+}
+
+.contact-email.is-sending .contact-email-field::before {
+  animation-duration: 0.72s;
+}
+
+.contact-email.is-sending .join-label {
+  opacity: 0;
+}
+
+.contact-email.is-sending .join-spin {
+  opacity: 1;
+  animation: join-spin 0.7s linear infinite;
+}
+
+.contact-email.is-joined .contact-email-row {
+  gap: 0;
+}
+
+.contact-email.is-joined .contact-email-field {
+  flex-basis: 0;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.contact-email.is-joined button {
+  flex-grow: 1;
+  animation: join-settle 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.contact-email.is-joined .join-face {
+  opacity: 0;
+  transform: translateY(-0.28rem);
+}
+
+.contact-email.is-joined .join-done {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.16s;
+}
+
+.contact-email.is-joined .join-check path {
+  animation: join-draw 0.45s 0.28s ease forwards;
+}
+
+.contact-email.is-joined .contact-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.contact-email.is-error .contact-email-row {
+  animation: join-shake 0.42s ease;
+}
+
+@keyframes join-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes join-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes join-settle {
+  40% {
+    box-shadow: 0 0 0 7px rgba(255, 255, 255, 0.16);
+  }
+}
+
+@keyframes join-shake {
+  20% { transform: translateX(-0.28rem); }
+  40% { transform: translateX(0.28rem); }
+  60% { transform: translateX(-0.14rem); }
+  80% { transform: translateX(0.14rem); }
 }
 
 .contact-more {
@@ -1252,6 +1401,12 @@ body {
     width: 100%;
   }
 
+  .contact-email.is-joined .contact-email-field {
+    max-width: none;
+    width: 100%;
+    max-height: 0;
+  }
+
   .contact-title {
     margin-top: 0.5rem;
     font-size: clamp(1.5rem, 6.2vw, 1.9rem);
@@ -1326,10 +1481,23 @@ body {
   .contact-email button,
   .peak-dots button::before,
   .contact-email-field::before,
+  .join-face,
+  .join-done,
+  .join-label,
+  .join-spin,
   .next-peak-copy,
   .next-peak-site,
   .contact-site {
     transition: none;
+    animation: none;
+  }
+
+  .contact-email.is-joined .join-check path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .contact-email.is-error .contact-email-row {
     animation: none;
   }
 }

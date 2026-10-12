@@ -163,6 +163,13 @@
         display: flex;
         flex-direction: column;
         gap: 0.45rem;
+        transition: gap 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .contact-email-field {
+        min-width: 0;
+        overflow: hidden;
+        transition: max-height 0.62s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
       }
 
       .contact-email input,
@@ -185,15 +192,131 @@
       }
 
       .contact-email button {
+        position: relative;
+        display: grid;
+        place-items: center;
         padding: 0.72rem 1rem;
         background: #fff;
         color: #141414;
         cursor: pointer;
+        overflow: hidden;
+      }
+
+      .join-face,
+      .join-done {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.42rem;
+        transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .join-face {
+        display: grid;
+        place-items: center;
+      }
+
+      .join-label,
+      .join-spin {
+        grid-area: 1 / 1;
+      }
+
+      .join-label {
+        transition: opacity 0.2s ease;
+      }
+
+      .join-spin {
+        width: 0.95rem;
+        height: 0.95rem;
+        border: 1.5px solid transparent;
+        border-top-color: #141414;
+        border-right-color: rgba(20, 20, 20, 0.28);
+        border-radius: 50%;
+        opacity: 0;
+      }
+
+      .join-done {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transform: translateY(0.35rem);
+        white-space: nowrap;
+      }
+
+      .join-check {
+        width: 1.05rem;
+        height: 1.05rem;
+        flex: none;
+      }
+
+      .join-check path {
+        stroke-dasharray: 28;
+        stroke-dashoffset: 28;
       }
 
       .contact-email button:disabled {
         cursor: progress;
-        opacity: 0.72;
+      }
+
+      .contact-email.is-sending .join-label {
+        opacity: 0;
+      }
+
+      .contact-email.is-sending .join-spin {
+        opacity: 1;
+        animation: join-spin 0.7s linear infinite;
+      }
+
+      .contact-email.is-joined .contact-email-row {
+        gap: 0;
+      }
+
+      .contact-email.is-joined .contact-email-field {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .contact-email.is-joined .join-face {
+        opacity: 0;
+        transform: translateY(-0.28rem);
+      }
+
+      .contact-email.is-joined .join-done {
+        opacity: 1;
+        transform: none;
+        transition-delay: 0.16s;
+      }
+
+      .contact-email.is-joined .join-check path {
+        animation: join-draw 0.45s 0.28s ease forwards;
+      }
+
+      .contact-email.is-joined .contact-status {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+
+      .contact-email.is-error .contact-email-row {
+        animation: join-shake 0.42s ease;
+      }
+
+      @keyframes join-spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes join-draw {
+        to { stroke-dashoffset: 0; }
+      }
+
+      @keyframes join-shake {
+        20% { transform: translateX(-0.28rem); }
+        40% { transform: translateX(0.28rem); }
+        60% { transform: translateX(-0.14rem); }
+        80% { transform: translateX(0.14rem); }
       }
 
       .contact-status {
@@ -372,8 +495,21 @@
             <form class="contact-email">
               <label for="expedition-email">Email</label>
               <div class="contact-email-row">
-                <input id="expedition-email" type="email" name="email" required autocomplete="email" placeholder="Your email" />
-                <button type="submit">Join</button>
+                <span class="contact-email-field">
+                  <input id="expedition-email" type="email" name="email" required autocomplete="email" placeholder="Your email" />
+                </span>
+                <button type="submit">
+                  <span class="join-face">
+                    <span class="join-label">Join</span>
+                    <span class="join-spin" aria-hidden="true"></span>
+                  </span>
+                  <span class="join-done" aria-hidden="true">
+                    <svg class="join-check" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 12.5 9.2 17 19 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span class="join-note"></span>
+                  </span>
+                </button>
               </div>
               <p class="contact-status" hidden aria-live="polite"></p>
             </form>
@@ -478,37 +614,56 @@
       });
 
       const emailForm = document.querySelector(".contact-email");
-      const signupUrl = "https://xjyofufpgpbindobcchd.supabase.co/rest/v1/expedition_signups";
+      const signupUrl = "https://xjyofufpgpbindobcchd.supabase.co/functions/v1/join-expedition";
       const signupKey = "sb_publishable_6xSDdeOqDHnWbmpThVLh0A_BdlEo-0v";
+      const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
       emailForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        if (emailForm.classList.contains("is-joined") || emailForm.classList.contains("is-sending")) return;
         const email = String(new FormData(emailForm).get("email") || "").trim();
         const status = emailForm.querySelector(".contact-status");
         const button = emailForm.querySelector("button");
+        const note = emailForm.querySelector(".join-note");
+        const done = emailForm.querySelector(".join-done");
         if (!email) return;
+        emailForm.classList.remove("is-error");
+        emailForm.classList.add("is-sending");
+        emailForm.setAttribute("aria-busy", "true");
         if (button) button.disabled = true;
-        status.hidden = false;
-        status.textContent = "Saving…";
+        const started = performance.now();
         try {
           const response = await fetch(signupUrl, {
             method: "POST",
             headers: {
               apikey: signupKey,
               "Content-Type": "application/json",
-              Prefer: "return=minimal",
             },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({
+              email,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              locale: navigator.language,
+            }),
           });
-          if (response.ok || response.status === 409) {
-            emailForm.reset();
-            status.textContent = response.status === 409 ? "You're already on the list." : "You're on the list.";
-          } else {
-            status.textContent = "That didn't save. Try again.";
-          }
+          const payload = await response.json().catch(() => ({}));
+          const wait = (reduceMotion ? 0 : 560) - (performance.now() - started);
+          if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+          if (!response.ok) throw new Error("save");
+          const message = payload.already ? "You're already on the list." : "You're on the list.";
+          if (note) note.textContent = message;
+          if (done) done.setAttribute("aria-hidden", "false");
+          status.hidden = false;
+          status.textContent = message;
+          emailForm.classList.remove("is-sending");
+          emailForm.classList.add("is-joined");
         } catch {
+          emailForm.classList.remove("is-sending");
+          emailForm.classList.add("is-error");
+          status.hidden = false;
           status.textContent = "That didn't save. Try again.";
-        } finally {
           if (button) button.disabled = false;
+          setTimeout(() => emailForm.classList.remove("is-error"), 460);
+        } finally {
+          emailForm.removeAttribute("aria-busy");
         }
       });
 

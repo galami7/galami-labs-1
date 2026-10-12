@@ -141,7 +141,18 @@
                       <span class="contact-email-field">
                         <input id="expedition-email" type="email" name="email" required autocomplete="email" placeholder="Your email" />
                       </span>
-                      <button type="submit">Join</button>
+                      <button type="submit">
+                        <span class="join-face">
+                          <span class="join-label">Join</span>
+                          <span class="join-spin" aria-hidden="true"></span>
+                        </span>
+                        <span class="join-done" aria-hidden="true">
+                          <svg class="join-check" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 12.5 9.2 17 19 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                          <span class="join-note"></span>
+                        </span>
+                      </button>
                     </div>
                     <p class="contact-status" hidden aria-live="polite"></p>
                   </form>
@@ -277,41 +288,62 @@
 
       const emailForm = document.querySelector(".contact-email");
       if (emailForm) {
-        const signupUrl = "https://xjyofufpgpbindobcchd.supabase.co/rest/v1/expedition_signups";
+        const signupUrl = "https://xjyofufpgpbindobcchd.supabase.co/functions/v1/join-expedition";
         const signupKey = "sb_publishable_6xSDdeOqDHnWbmpThVLh0A_BdlEo-0v";
+        const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
         emailForm.addEventListener("submit", async (event) => {
           event.preventDefault();
+          if (emailForm.classList.contains("is-joined") || emailForm.classList.contains("is-sending")) return;
           const email = String(new FormData(emailForm).get("email") || "").trim();
           const status = emailForm.querySelector(".contact-status");
           const button = emailForm.querySelector("button");
+          const note = emailForm.querySelector(".join-note");
+          const done = emailForm.querySelector(".join-done");
           if (!email) return;
+          emailForm.classList.remove("is-error");
+          emailForm.classList.add("is-sending");
+          emailForm.setAttribute("aria-busy", "true");
           if (button) button.disabled = true;
-          if (status) {
-            status.hidden = false;
-            status.textContent = "Saving…";
-          }
+          const started = performance.now();
           try {
             const response = await fetch(signupUrl, {
               method: "POST",
               headers: {
                 apikey: signupKey,
                 "Content-Type": "application/json",
-                Prefer: "return=minimal",
               },
-              body: JSON.stringify({ email }),
+              body: JSON.stringify({
+                email,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                locale: navigator.language,
+              }),
             });
-            if (response.ok || response.status === 409) {
-              emailForm.reset();
-              if (status) {
-                status.textContent = response.status === 409 ? "You're already on the list." : "You're on the list.";
-              }
-            } else if (status) {
+            const payload = await response.json().catch(() => ({}));
+            const wait = (reduceMotion ? 0 : 560) - (performance.now() - started);
+            if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+            if (!response.ok) throw new Error("save");
+            const message = payload.already ? "You're already on the list." : "You're on the list.";
+            if (note) note.textContent = message;
+            if (done) done.setAttribute("aria-hidden", "false");
+            if (status) {
+              status.hidden = false;
+              status.textContent = message;
+            }
+            emailForm.classList.remove("is-sending");
+            emailForm.classList.add("is-joined");
+          } catch {
+            const wait = (reduceMotion ? 0 : 280) - (performance.now() - started);
+            if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+            emailForm.classList.remove("is-sending");
+            emailForm.classList.add("is-error");
+            if (status) {
+              status.hidden = false;
               status.textContent = "That didn't save. Try again.";
             }
-          } catch {
-            if (status) status.textContent = "That didn't save. Try again.";
-          } finally {
             if (button) button.disabled = false;
+            setTimeout(() => emailForm.classList.remove("is-error"), 460);
+          } finally {
+            emailForm.removeAttribute("aria-busy");
           }
         });
       }
