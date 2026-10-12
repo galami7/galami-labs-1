@@ -711,10 +711,6 @@ body {
   transform: none;
 }
 
-.contact-email.is-sending .contact-email-field::before {
-  animation-duration: 0.72s;
-}
-
 .contact-email.is-sending .join-label {
   opacity: 0;
 }

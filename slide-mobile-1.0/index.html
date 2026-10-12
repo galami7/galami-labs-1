@@ -619,7 +619,6 @@
       const emailForm = document.querySelector(".contact-email");
       const signupUrl = "https://xjyofufpgpbindobcchd.supabase.co/functions/v1/join-expedition";
       const signupKey = "sb_publishable_6xSDdeOqDHnWbmpThVLh0A_BdlEo-0v";
-      const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
       emailForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (emailForm.classList.contains("is-joined") || emailForm.classList.contains("is-sending")) return;
@@ -633,7 +632,6 @@
         emailForm.classList.add("is-sending");
         emailForm.setAttribute("aria-busy", "true");
         if (button) button.disabled = true;
-        const started = performance.now();
         try {
           const response = await fetch(signupUrl, {
             method: "POST",
@@ -648,8 +646,6 @@
             }),
           });
           const payload = await response.json().catch(() => ({}));
-          const wait = (reduceMotion ? 0 : 560) - (performance.now() - started);
-          if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
           if (!response.ok) throw new Error("save");
           const message = payload.already ? "Already on the list." : "You're on the list.";
           if (note) note.textContent = message;
