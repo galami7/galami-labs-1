@@ -1432,6 +1432,7 @@ body {
     height: 26vh;
     cursor: pointer;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .summit-spot {
