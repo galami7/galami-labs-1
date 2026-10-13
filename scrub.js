@@ -658,8 +658,9 @@ const placeStatement = () => {
   const safeTop = readSafeInsets().top;
   const height = statement.offsetHeight;
   const gap = 12;
+  const drop = 28;
   const mid = (Math.max(safeTop, 0) + labelTop) / 2;
-  let viewTop = mid - height / 2;
+  let viewTop = mid - height / 2 + drop;
   const minTop = safeTop + 4;
   const maxTop = labelTop - gap - height;
   viewTop = Math.min(Math.max(viewTop, minTop), Math.max(minTop, maxTop));
@@ -874,6 +875,7 @@ if (peaks && advance && prevStep && nextStep) {
   if (summitLayer) {
     summitLayer.querySelectorAll(".summit").forEach((marker, index) => {
       marker.addEventListener("click", () => {
+        marker.blur();
         if (!isPhone() || !pin.classList.contains("is-end") || pin.classList.contains("is-peaks")) return;
         const spot = marker.closest(".summit-spot");
         const shown = spot && spot.classList.contains("is-shown");

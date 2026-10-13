@@ -1440,6 +1440,20 @@ body {
 
   .summit-spot .summit {
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .summit-spot .summit:focus,
+  .summit-spot .summit:focus-visible,
+  .summit-spot .summit:active {
+    outline: none;
+    background: transparent;
+    box-shadow: none;
   }
 
   .summit-spot:hover .summit-line,
