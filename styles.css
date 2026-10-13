@@ -1516,7 +1516,7 @@ body {
   .name-adjust {
     position: fixed;
     z-index: 20;
-    top: calc(0.7rem + env(safe-area-inset-top, 0px));
+    bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
     left: 0.8rem;
     right: 0.8rem;
     display: flex;
