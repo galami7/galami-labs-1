@@ -1550,7 +1550,7 @@ body {
   .contact-card {
     z-index: 2;
     top: 13%;
-    left: calc(50% - 50vw + 1.15rem + env(safe-area-inset-left, 0px));
+    left: calc(50% - 50vw + 1.55rem + env(safe-area-inset-left, 0px));
     width: min(12.25rem, 50vw);
     height: auto;
     justify-content: flex-start;
