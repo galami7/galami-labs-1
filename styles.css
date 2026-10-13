@@ -1526,24 +1526,20 @@ body {
     display: block;
     position: absolute;
     z-index: 0;
-    left: calc(50% - 54vw);
-    width: 108vw;
-    height: 68%;
-    background-image: url("Mountain Peak 3.0.jpg");
+    top: -8%;
+    left: 0;
+    width: 100%;
+    height: 116%;
+    background-image: url("Long Mountain Range.jpg");
     background-repeat: no-repeat;
-    background-size: auto 520%;
-    filter: blur(16px);
+    background-size: 300% 100%;
+    background-position: 100% center;
+    filter: blur(26px);
     pointer-events: none;
   }
 
-  .phase-bleed-top {
-    top: -8%;
-    background-position: center top;
-  }
-
   .phase-bleed-bottom {
-    bottom: -8%;
-    background-position: center bottom;
+    display: none;
   }
 
   .explore-more {
