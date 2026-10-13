@@ -42,8 +42,10 @@ const fitStatementTitle = () => {
     return;
   }
   const available = Math.max(120, pin.clientWidth - 40);
+  title.style.width = "max-content";
   title.style.fontSize = "100px";
   const width = title.getBoundingClientRect().width;
+  title.style.width = "";
   if (width <= 0) return;
   title.style.fontSize = `${(100 * available) / width}px`;
 };
