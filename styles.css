@@ -1448,6 +1448,10 @@ body {
     box-shadow: 0 0 6px rgba(8, 22, 48, 0.7);
   }
 
+  .summit-spot:last-child .summit-line {
+    transform: translate(calc(-50% + 0.75rem), -100%);
+  }
+
   .pin.is-end:not(.is-peaks) .summit-label {
     opacity: 1;
   }
