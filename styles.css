@@ -1464,7 +1464,7 @@ body {
     display: block;
     position: absolute;
     z-index: 3;
-    left: calc((var(--frame) - 100cqi) / 2 + 1.15rem + env(safe-area-inset-left, 0px));
+    left: calc(50% - 50vw + 1.15rem + env(safe-area-inset-left, 0px));
     bottom: calc(1.45rem + var(--chrome-bottom, env(safe-area-inset-bottom, 0px)));
     color: #fff;
     font: 500 0.92rem/1.2 system-ui, sans-serif;
@@ -1478,10 +1478,15 @@ body {
 
   .contact-card {
     top: 17%;
-    left: calc(50% - 50cqi + 1.85rem);
-    width: min(12.25rem, 50vw);
+    left: calc(50% - 50vw + 1.85rem + env(safe-area-inset-left, 0px));
+    width: min(20rem, calc(100vw - 3.7rem));
     height: auto;
     justify-content: flex-start;
+  }
+
+  .contact-intro {
+    width: 100%;
+    max-width: 100%;
   }
 
   .contact-email-field {
@@ -1501,8 +1506,8 @@ body {
 
   .contact-title {
     margin-top: 0.5rem;
-    font-size: clamp(1.5rem, 6.2vw, 1.9rem);
-    white-space: normal;
+    font-size: min(1.85rem, 7.4vw);
+    white-space: nowrap;
   }
 
   .contact-kicker {
