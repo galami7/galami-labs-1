@@ -641,6 +641,29 @@ const placeSummits = () => {
   if (advanceButton) advanceButton.style.left = along(isPhone() ? 0.5 : 0.496);
   fitPilatusStick();
   clampNameLabels();
+  placeStatement();
+};
+
+const placeStatement = () => {
+  const statement = document.querySelector(".statement");
+  if (!statement) return;
+  if (!isPhone()) {
+    statement.style.top = "";
+    return;
+  }
+  const label = document.querySelector(".summit-spot:last-child .summit-label");
+  if (!label) return;
+  const pinTop = pin.getBoundingClientRect().top;
+  const labelTop = label.getBoundingClientRect().top;
+  const safeTop = readSafeInsets().top;
+  const height = statement.offsetHeight;
+  const gap = 12;
+  const mid = (Math.max(safeTop, 0) + labelTop) / 2;
+  let viewTop = mid - height / 2;
+  const minTop = safeTop + 4;
+  const maxTop = labelTop - gap - height;
+  viewTop = Math.min(Math.max(viewTop, minTop), Math.max(minTop, maxTop));
+  statement.style.top = `${viewTop - pinTop}px`;
 };
 
 const fitPilatusStick = () => {
