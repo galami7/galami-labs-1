@@ -644,6 +644,59 @@ const placeSummits = () => {
   placeStatement();
 };
 
+let skySample = null;
+let skySampleKey = "";
+
+const readSky = () => {
+  if (!endStill.naturalWidth || !pin.clientWidth || !pin.clientHeight) return null;
+  const key = `${pin.clientWidth}x${pin.clientHeight}x${endStill.naturalWidth}x${endStill.naturalHeight}`;
+  if (skySample && skySampleKey === key) return skySample;
+  const width = Math.max(1, Math.round(pin.clientWidth / 2));
+  const height = Math.max(1, Math.round(pin.clientHeight / 2));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  const scale = Math.max(width / endStill.naturalWidth, height / endStill.naturalHeight);
+  const drawnWidth = endStill.naturalWidth * scale;
+  const drawnHeight = endStill.naturalHeight * scale;
+  context.drawImage(endStill, (width - drawnWidth) / 2, (height - drawnHeight) / 2, drawnWidth, drawnHeight);
+  skySample = { data: context.getImageData(0, 0, width, height).data, width, height };
+  skySampleKey = key;
+  return skySample;
+};
+
+const skyIsCloud = (map, pinX, pinY) => {
+  const sx = Math.max(0, Math.min(map.width - 1, Math.round((pinX / pin.clientWidth) * (map.width - 1))));
+  const sy = Math.max(0, Math.min(map.height - 1, Math.round((pinY / pin.clientHeight) * (map.height - 1))));
+  const index = (sy * map.width + sx) * 4;
+  const red = map.data[index];
+  const green = map.data[index + 1];
+  const blue = map.data[index + 2];
+  const luma = (red + green + blue) / 3;
+  return luma > 198 && blue - red < 18 && blue - green < 22;
+};
+
+const inkBox = (element) => {
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  return range.getBoundingClientRect();
+};
+
+const textOnSky = (map, rect, pinRect) => {
+  const left = rect.left - pinRect.left - 12;
+  const right = rect.right - pinRect.left - 14;
+  const top = rect.top - pinRect.top;
+  const bottom = rect.bottom - pinRect.top + 6;
+  if (right <= left) return true;
+  for (let y = top; y <= bottom; y += 4) {
+    for (let x = left; x <= right; x += 6) {
+      if (skyIsCloud(map, x, y)) return false;
+    }
+  }
+  return true;
+};
+
 const placeStatement = () => {
   const statement = document.querySelector(".statement");
   if (!statement) return;
@@ -653,7 +706,7 @@ const placeStatement = () => {
   }
   const label = document.querySelector(".summit-spot:last-child .summit-label");
   if (!label) return;
-  const pinTop = pin.getBoundingClientRect().top;
+  const pinRect = pin.getBoundingClientRect();
   const labelTop = label.getBoundingClientRect().top;
   const safeTop = readSafeInsets().top;
   const height = statement.offsetHeight;
@@ -664,7 +717,16 @@ const placeStatement = () => {
   const minTop = safeTop + 4;
   const maxTop = labelTop - gap - height;
   viewTop = Math.min(Math.max(viewTop, minTop), Math.max(minTop, maxTop));
-  statement.style.top = `${viewTop - pinTop}px`;
+  statement.style.top = `${viewTop - pinRect.top}px`;
+  const map = readSky();
+  const title = document.querySelector(".statement-title");
+  const hint = document.querySelector(".hint-tap");
+  if (!map || !title || !hint) return;
+  for (let step = 0; step < 36 && viewTop > minTop; step += 1) {
+    if (textOnSky(map, inkBox(title), pinRect) && textOnSky(map, inkBox(hint), pinRect)) break;
+    viewTop = Math.max(minTop, viewTop - 4);
+    statement.style.top = `${viewTop - pinRect.top}px`;
+  }
 };
 
 const fitPilatusStick = () => {
