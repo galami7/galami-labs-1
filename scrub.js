@@ -14,6 +14,26 @@ const phoneBand = () => {
   return { top: 24, bottom: 24 };
 };
 
+let safeProbe = null;
+
+const readSafeInsets = () => {
+  if (!safeProbe) {
+    safeProbe = document.createElement("div");
+    safeProbe.className = "safe-area-probe";
+    safeProbe.setAttribute("aria-hidden", "true");
+    document.documentElement.appendChild(safeProbe);
+  }
+  const style = getComputedStyle(safeProbe);
+  const px = (value) => {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  return {
+    top: px(style.paddingTop),
+    bottom: px(style.paddingBottom),
+  };
+};
+
 const endScroll = () => {
   const span = isPhone() ? pin.offsetHeight : window.innerHeight;
   const end = Math.max(0, track.offsetHeight - span);
@@ -50,6 +70,7 @@ const fitPhonePin = () => {
   }
 
   const band = phoneBand();
+  const safe = readSafeInsets();
   const viewport = window.visualViewport;
   const topBar = viewport ? viewport.offsetTop : 0;
   const bottomBar = viewport ? Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height) : 0;
@@ -60,8 +81,8 @@ const fitPhonePin = () => {
   pin.style.height = `${window.innerHeight + band.top + band.bottom}px`;
   pin.style.setProperty("--band-top", `${band.top}px`);
   pin.style.setProperty("--band-bottom", `${band.bottom}px`);
-  pin.style.setProperty("--chrome-top", `${band.top + topBar}px`);
-  pin.style.setProperty("--chrome-bottom", `${band.bottom + bottomBar}px`);
+  pin.style.setProperty("--chrome-top", `${band.top + topBar + safe.top}px`);
+  pin.style.setProperty("--chrome-bottom", `${band.bottom + Math.max(bottomBar, safe.bottom)}px`);
   parkAtStart();
 };
 

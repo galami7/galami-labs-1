@@ -13,6 +13,21 @@ body {
   color-scheme: light;
 }
 
+.safe-area-probe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  padding:
+    env(safe-area-inset-top, 0px)
+    env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px);
+}
+
 .scrub {
   height: 250vh;
 }
@@ -907,7 +922,7 @@ body {
 .peak-readout {
   position: absolute;
   z-index: 7;
-  top: calc(1.05rem + env(safe-area-inset-top));
+  top: calc(1.05rem + var(--chrome-top, env(safe-area-inset-top, 0px)));
   left: calc(1.05rem + (2.75rem - 1.45rem) / 2 + 1.45rem * 6 / 24 + env(safe-area-inset-left));
   display: flex;
   align-items: center;
@@ -1039,8 +1054,8 @@ body {
 .replay {
   position: absolute;
   z-index: 9;
-  top: calc(1.05rem + env(safe-area-inset-top));
-  right: calc(1.05rem + env(safe-area-inset-right));
+  top: calc(1.05rem + var(--chrome-top, env(safe-area-inset-top, 0px)));
+  right: calc(1.05rem + env(safe-area-inset-right, 0px));
   display: grid;
   place-items: center;
   width: 2.75rem;
@@ -1139,7 +1154,7 @@ body {
   position: absolute;
   left: 1.25rem;
   right: 1.25rem;
-  bottom: calc(1.7rem + env(safe-area-inset-bottom));
+  bottom: calc(1.7rem + var(--chrome-bottom, env(safe-area-inset-bottom, 0px)));
   margin: 0;
   text-align: center;
   font: 500 0.98rem/1.35 system-ui, sans-serif;
@@ -1272,6 +1287,10 @@ body {
   }
 
   .pin {
+    --band-top: 24px;
+    --band-bottom: 24px;
+    --chrome-top: calc(var(--band-top) + env(safe-area-inset-top, 0px));
+    --chrome-bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom, 0px));
     position: sticky;
     top: -24px;
     height: calc(100lvh + 48px);
@@ -1295,7 +1314,7 @@ body {
   }
 
   .wordmark {
-    top: max(calc(var(--band-top, 24px) + 14svh), calc(var(--chrome-top, env(safe-area-inset-top)) + 0.85rem));
+    top: max(calc(var(--band-top, 24px) + 14svh), calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.85rem));
     left: 0;
     right: 0;
     padding: 0;
@@ -1307,7 +1326,7 @@ body {
   }
 
   .statement {
-    top: max(calc(var(--band-top, 24px) + 4.6svh), calc(var(--chrome-top, env(safe-area-inset-top)) + 0.35rem));
+    top: max(calc(var(--band-top, 24px) + 4.6svh), calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.35rem));
     padding: 0 1rem;
   }
 
@@ -1422,6 +1441,10 @@ body {
 
   .contact-email {
     margin-top: 0.95rem;
+  }
+
+  .contact-email input {
+    font-size: 16px;
   }
 
   .contact-email-row {
