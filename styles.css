@@ -1457,15 +1457,16 @@ body {
 
   .summit-name,
   .summit-height {
-    text-shadow: 0 1px 8px rgba(8, 22, 48, 0.4);
+    color: #1a3358;
+    text-shadow: none;
   }
 
   .summit-label {
     padding: 0.22rem 0.48rem 0.28rem;
     border-radius: 0.55rem;
-    background: rgba(255, 255, 255, 0.22);
-    -webkit-backdrop-filter: blur(14px) saturate(1.25);
-    backdrop-filter: blur(14px) saturate(1.25);
+    background: rgba(255, 255, 255, 0.58);
+    -webkit-backdrop-filter: blur(16px) saturate(1.35);
+    backdrop-filter: blur(16px) saturate(1.35);
   }
 
   .summit-spot .summit-label {
