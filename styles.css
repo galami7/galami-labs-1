@@ -1532,9 +1532,9 @@ body {
     height: 116%;
     background-image: url("Long Mountain Range.jpg");
     background-repeat: no-repeat;
-    background-size: 300% 100%;
-    background-position: 100% center;
-    filter: blur(26px);
+    background-size: 300% 155%;
+    background-position: 100% 100%;
+    filter: blur(28px);
     pointer-events: none;
   }
 
