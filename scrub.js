@@ -562,23 +562,21 @@ snapHeights(0);
 const peakCount = document.querySelector(".peak-close") ? 4 : document.querySelector(".range") ? 3 : 0;
 let peakIndex = 0;
 
-const applyNameOffsets = () => {
-  if (!summitLayer) return;
-  summitLayer.querySelectorAll(".summit-label").forEach((label, index) => {
-    const offset = isPhone() ? nameOffsets[index] : null;
-    if (!offset) {
-      label.style.removeProperty("--name-x");
-      label.style.removeProperty("--name-y");
-      return;
-    }
-    label.style.setProperty("--name-x", `${offset.x}px`);
-    label.style.setProperty("--name-y", `${offset.y}px`);
+const clampNameLabels = () => {
+  if (!isPhone() || !summitLayer) return;
+  const pad = 8;
+  summitLayer.querySelectorAll(".summit-label").forEach((label) => {
+    label.style.setProperty("--name-x", "0px");
+    const box = label.getBoundingClientRect();
+    let shift = 0;
+    if (box.left < pad) shift = pad - box.left;
+    else if (box.right > window.innerWidth - pad) shift = window.innerWidth - pad - box.right;
+    label.style.setProperty("--name-x", `${shift}px`);
   });
 };
 
 const placeSummits = () => {
   fitPhonePin();
-  applyNameOffsets();
   if (!summitLayer || !endStill.naturalWidth) return;
   const viewW = pin.clientWidth;
   const viewH = pin.clientHeight;
@@ -617,8 +615,9 @@ const placeSummits = () => {
       return;
     }
     const host = spot || marker;
-    host.style.left = `${offsetX + markerX(marker) * drawnW}px`;
-    host.style.top = `${offsetY + markerY(marker) * drawnH}px`;
+    const nudge = isPhone() ? nameOffsets[index] : { x: 0, y: 0 };
+    host.style.left = `${offsetX + (markerX(marker) + nudge.x) * drawnW}px`;
+    host.style.top = `${offsetY + (markerY(marker) + nudge.y) * drawnH}px`;
     if (!spot) return;
     host.style.width = "";
     host.style.height = "";
@@ -635,6 +634,7 @@ const placeSummits = () => {
   const advanceButton = document.querySelector(".advance");
   if (advanceButton) advanceButton.style.left = along(isPhone() ? 0.5 : 0.496);
   fitPilatusStick();
+  clampNameLabels();
 };
 
 const fitPilatusStick = () => {
@@ -658,12 +658,22 @@ const fitPilatusStick = () => {
 
 if (summitLayer) {
   const namePanel = document.querySelector(".name-adjust");
+  const nameFrame = () => {
+    const viewW = pin.clientWidth;
+    const viewH = pin.clientHeight;
+    const scale = Math.max(viewW / endStill.naturalWidth, viewH / endStill.naturalHeight);
+    return {
+      drawnW: endStill.naturalWidth * scale,
+      drawnH: endStill.naturalHeight * scale,
+    };
+  };
   const paintNameReadout = () => {
     const readout = namePanel && namePanel.querySelector(".name-adjust-readout");
-    if (!readout) return;
+    if (!readout || !endStill.naturalWidth) return;
+    const { drawnW, drawnH } = nameFrame();
     const names = ["Rigi", "Pilatus", "Matterhorn"];
     readout.textContent = nameOffsets
-      .map((offset, index) => `${names[index]} ${offset.x}, ${offset.y}`)
+      .map((offset, index) => `${names[index]} ${Math.round(offset.x * drawnW)}, ${Math.round(offset.y * drawnH)}`)
       .join("\n");
   };
   if (nameAdjust && isPhone() && namePanel) {
@@ -672,19 +682,21 @@ if (summitLayer) {
     summitLayer.querySelectorAll(".summit-label").forEach((label, index) => {
       label.classList.add("is-adjustable");
       label.addEventListener("pointerdown", (event) => {
-        if (!isPhone()) return;
+        if (!isPhone() || !endStill.naturalWidth) return;
         event.preventDefault();
         event.stopPropagation();
         label.setPointerCapture(event.pointerId);
         const startX = event.clientX;
         const startY = event.clientY;
         const origin = { ...nameOffsets[index] };
+        const { drawnW, drawnH } = nameFrame();
         const move = (ev) => {
           nameOffsets[index] = {
-            x: Math.round(origin.x + ev.clientX - startX),
-            y: Math.round(origin.y + ev.clientY - startY),
+            x: origin.x + (ev.clientX - startX) / drawnW,
+            y: origin.y + (ev.clientY - startY) / drawnH,
           };
-          applyNameOffsets();
+          placeSummits();
+          paintNameReadout();
         };
         const up = () => {
           label.removeEventListener("pointermove", move);
@@ -703,7 +715,7 @@ if (summitLayer) {
       resetNames.addEventListener("click", () => {
         nameOffsets = blankNames();
         localStorage.removeItem(nameKey);
-        applyNameOffsets();
+        placeSummits();
         paintNameReadout();
       });
     }
