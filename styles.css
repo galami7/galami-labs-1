@@ -1384,10 +1384,27 @@ body {
 
   .pin.is-end:not(.is-peaks) .summit-line {
     height: 2.05rem;
+    box-shadow: 0 0 6px rgba(8, 22, 48, 0.7);
   }
 
   .pin.is-end:not(.is-peaks) .summit-label {
     opacity: 1;
+  }
+
+  .summit-name,
+  .summit-height {
+    text-shadow:
+      0 0 1px rgba(8, 22, 48, 0.95),
+      0 1px 2px rgba(8, 22, 48, 0.9),
+      0 0 12px rgba(8, 22, 48, 0.8);
+  }
+
+  .summit-label {
+    padding: 0.22rem 0.48rem 0.28rem;
+    border-radius: 0.5rem;
+    background: rgba(12, 30, 64, 0.46);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    backdrop-filter: blur(10px) saturate(1.15);
   }
 
   .summit-spot .summit-label {
