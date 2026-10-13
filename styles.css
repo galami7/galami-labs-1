@@ -370,7 +370,6 @@ body {
   visibility: visible;
 }
 
-.phase-bleed,
 .screen-bleed {
   display: none;
 }
@@ -1516,32 +1515,7 @@ body {
     white-space: nowrap;
   }
 
-  .pin .peaks .peak-close,
   .next-peak {
-    display: none;
-  }
-
-  .phase:nth-child(4) {
-    background: transparent;
-  }
-
-  .phase-bleed {
-    display: block;
-    position: absolute;
-    z-index: 0;
-    top: -8%;
-    left: 0;
-    width: 100%;
-    height: 116%;
-    background-image: url("Long Mountain Range.jpg");
-    background-repeat: no-repeat;
-    background-size: 300% 100%;
-    background-position: 100% center;
-    filter: blur(6px) saturate(1.05);
-    pointer-events: none;
-  }
-
-  .phase-bleed-bottom {
     display: none;
   }
 
@@ -1563,16 +1537,11 @@ body {
 
   .contact-card {
     z-index: 2;
-    top: 17%;
-    left: calc(50% - 50vw + 1.85rem + env(safe-area-inset-left, 0px));
-    width: min(20rem, calc(100vw - 3.7rem));
+    top: 13%;
+    left: calc(50% - 50vw + 1.15rem + env(safe-area-inset-left, 0px));
+    width: min(12.25rem, 50vw);
     height: auto;
     justify-content: flex-start;
-  }
-
-  .contact-intro {
-    width: 100%;
-    max-width: 100%;
   }
 
   .contact-email-field {
@@ -1592,8 +1561,8 @@ body {
 
   .contact-title {
     margin-top: 0.5rem;
-    font-size: min(1.85rem, 7.4vw);
-    white-space: nowrap;
+    font-size: clamp(1.5rem, 6.2vw, 1.9rem);
+    white-space: normal;
   }
 
   .contact-kicker {

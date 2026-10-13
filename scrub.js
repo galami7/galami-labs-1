@@ -833,7 +833,9 @@ const showPeak = (index) => {
   syncPeaks();
   slideFrom = peakPosition;
   slideTo = index;
-  slideDuration = Math.min(0.72, 0.46 + Math.abs(slideTo - slideFrom) * 0.08);
+  const slideDistance = Math.abs(slideTo - slideFrom);
+  slideDuration = Math.min(0.72, 0.46 + slideDistance * 0.08);
+  if (slideTo === peakCount - 1 && slideTo > slideFrom) slideDuration *= 0.62;
   slideStart = performance.now();
   if (reduceMotion.matches) {
     cancelAnimationFrame(peakFrame);
