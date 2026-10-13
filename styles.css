@@ -370,7 +370,14 @@ body {
   visibility: visible;
 }
 
+.range-bleed,
+.phase-bleed,
+.screen-bleed {
+  display: none;
+}
+
 .pin .peaks .range,
+.pin .peaks .range-bleed,
 .pin .peaks .peak-close,
 .pin .peaks .range-notes {
   position: absolute;
@@ -387,7 +394,8 @@ body {
   transform: translate3d(calc((100cqi - var(--frame)) / 2 - (var(--peak) + var(--peak-shift)) * var(--frame)), -50%, 0);
 }
 
-.pin .peaks .range {
+.pin .peaks .range,
+.pin .peaks .range-bleed {
   width: calc(var(--frame) * 3);
   max-width: none;
   object-fit: fill;
@@ -1296,10 +1304,56 @@ body {
     --chrome-top: calc(var(--band-top) + env(safe-area-inset-top, 0px));
     --chrome-bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom, 0px));
     position: sticky;
+    z-index: 1;
     top: -24px;
     height: calc(100lvh + 48px);
     background: transparent;
     overflow: hidden;
+  }
+
+  .screen-bleed {
+    display: block;
+    position: fixed;
+    z-index: 0;
+    inset: -8%;
+    pointer-events: none;
+  }
+
+  .screen-bleed-start,
+  .screen-bleed-end {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    filter: blur(28px);
+    transform: scale(1.08);
+    opacity: 0;
+  }
+
+  .screen-bleed-start {
+    background-image: url("Mobile First Frame.jpg");
+    opacity: 1;
+  }
+
+  .screen-bleed-end {
+    background-image: url("Mobile Middle Frame 1.0.jpg");
+  }
+
+  .pin.is-away .screen-bleed-start {
+    opacity: 0;
+  }
+
+  html.is-video-loading .screen-bleed-start {
+    opacity: 1;
+  }
+
+  .pin.is-end:not(.is-peaks) .screen-bleed-end {
+    opacity: 1;
+  }
+
+  .pin.is-peaks .screen-bleed-start,
+  .pin.is-peaks .screen-bleed-end {
+    opacity: 0;
   }
 
   .pin.is-peaks {
@@ -1456,8 +1510,40 @@ body {
     display: none;
   }
 
+  .pin .peaks .range-bleed {
+    display: block;
+    z-index: -1;
+    height: 100cqb;
+    background: url("Long Mountain Range.jpg") center / 100% 100% no-repeat;
+    filter: blur(34px);
+  }
+
   .phase:nth-child(4) {
-    background: var(--sky);
+    background: transparent;
+  }
+
+  .phase-bleed {
+    display: block;
+    position: absolute;
+    z-index: 0;
+    left: calc(50% - 54vw);
+    width: 108vw;
+    height: 68%;
+    background-image: url("Mountain Peak 3.0.jpg");
+    background-repeat: no-repeat;
+    background-size: auto 520%;
+    filter: blur(16px);
+    pointer-events: none;
+  }
+
+  .phase-bleed-top {
+    top: -8%;
+    background-position: center top;
+  }
+
+  .phase-bleed-bottom {
+    bottom: -8%;
+    background-position: center bottom;
   }
 
   .explore-more {
@@ -1477,6 +1563,7 @@ body {
   }
 
   .contact-card {
+    z-index: 2;
     top: 17%;
     left: calc(50% - 50vw + 1.85rem + env(safe-area-inset-left, 0px));
     width: min(20rem, calc(100vw - 3.7rem));
