@@ -14,6 +14,40 @@ const phoneBand = () => {
   return { top: 24, bottom: 24 };
 };
 
+const nameKey = "galami-phone-names";
+const nameAdjust = new URLSearchParams(location.search).has("names");
+const blankNames = () => [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }];
+
+const readNameOffsets = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(nameKey));
+    if (
+      Array.isArray(saved)
+      && saved.length === 3
+      && saved.every((item) => item && Number.isFinite(item.x) && Number.isFinite(item.y))
+    ) {
+      return saved.map((item) => ({ x: item.x, y: item.y }));
+    }
+  } catch (error) {}
+  return blankNames();
+};
+
+let nameOffsets = readNameOffsets();
+
+const fitStatementTitle = () => {
+  const title = document.querySelector(".statement-title");
+  if (!title) return;
+  if (!isPhone()) {
+    title.style.fontSize = "";
+    return;
+  }
+  const available = Math.max(120, pin.clientWidth - 40);
+  title.style.fontSize = "100px";
+  const width = title.getBoundingClientRect().width;
+  if (width <= 0) return;
+  title.style.fontSize = `${(100 * available) / width}px`;
+};
+
 let safeProbe = null;
 
 const readSafeInsets = () => {
@@ -66,6 +100,7 @@ const fitPhonePin = () => {
     pin.style.removeProperty("--band-bottom");
     pin.style.removeProperty("--chrome-top");
     pin.style.removeProperty("--chrome-bottom");
+    fitStatementTitle();
     return;
   }
 
@@ -83,6 +118,7 @@ const fitPhonePin = () => {
   pin.style.setProperty("--band-bottom", `${band.bottom}px`);
   pin.style.setProperty("--chrome-top", `${band.top + topBar + safe.top}px`);
   pin.style.setProperty("--chrome-bottom", `${band.bottom + Math.max(bottomBar, safe.bottom)}px`);
+  fitStatementTitle();
   parkAtStart();
 };
 
@@ -524,8 +560,23 @@ snapHeights(0);
 const peakCount = document.querySelector(".peak-close") ? 4 : document.querySelector(".range") ? 3 : 0;
 let peakIndex = 0;
 
+const applyNameOffsets = () => {
+  if (!summitLayer) return;
+  summitLayer.querySelectorAll(".summit-label").forEach((label, index) => {
+    const offset = isPhone() ? nameOffsets[index] : null;
+    if (!offset) {
+      label.style.removeProperty("--name-x");
+      label.style.removeProperty("--name-y");
+      return;
+    }
+    label.style.setProperty("--name-x", `${offset.x}px`);
+    label.style.setProperty("--name-y", `${offset.y}px`);
+  });
+};
+
 const placeSummits = () => {
   fitPhonePin();
+  applyNameOffsets();
   if (!summitLayer || !endStill.naturalWidth) return;
   const viewW = pin.clientWidth;
   const viewH = pin.clientHeight;
@@ -604,6 +655,57 @@ const fitPilatusStick = () => {
 };
 
 if (summitLayer) {
+  const namePanel = document.querySelector(".name-adjust");
+  const paintNameReadout = () => {
+    const readout = namePanel && namePanel.querySelector(".name-adjust-readout");
+    if (!readout) return;
+    const names = ["Rigi", "Pilatus", "Matterhorn"];
+    readout.textContent = nameOffsets
+      .map((offset, index) => `${names[index]} ${offset.x}, ${offset.y}`)
+      .join("\n");
+  };
+  if (nameAdjust && isPhone() && namePanel) {
+    namePanel.hidden = false;
+    paintNameReadout();
+    summitLayer.querySelectorAll(".summit-label").forEach((label, index) => {
+      label.classList.add("is-adjustable");
+      label.addEventListener("pointerdown", (event) => {
+        if (!isPhone()) return;
+        event.preventDefault();
+        event.stopPropagation();
+        label.setPointerCapture(event.pointerId);
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const origin = { ...nameOffsets[index] };
+        const move = (ev) => {
+          nameOffsets[index] = {
+            x: Math.round(origin.x + ev.clientX - startX),
+            y: Math.round(origin.y + ev.clientY - startY),
+          };
+          applyNameOffsets();
+        };
+        const up = () => {
+          label.removeEventListener("pointermove", move);
+          label.removeEventListener("pointerup", up);
+          label.removeEventListener("pointercancel", up);
+          localStorage.setItem(nameKey, JSON.stringify(nameOffsets));
+          paintNameReadout();
+        };
+        label.addEventListener("pointermove", move);
+        label.addEventListener("pointerup", up);
+        label.addEventListener("pointercancel", up);
+      });
+    });
+    const resetNames = namePanel.querySelector(".name-adjust-reset");
+    if (resetNames) {
+      resetNames.addEventListener("click", () => {
+        nameOffsets = blankNames();
+        localStorage.removeItem(nameKey);
+        applyNameOffsets();
+        paintNameReadout();
+      });
+    }
+  }
   if (endStill.complete && endStill.naturalWidth) placeSummits();
   endStill.addEventListener("load", placeSummits);
   window.addEventListener("resize", placeSummits);
