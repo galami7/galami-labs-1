@@ -1318,12 +1318,12 @@ body {
   }
 
   .wordmark {
-    top: max(calc(var(--band-top, 24px) + 14svh), calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.85rem));
+    top: max(calc(var(--band-top, 24px) + 21svh), calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.85rem));
     left: 0;
     right: 0;
     padding: 0;
     text-align: center;
-    font-size: 10.5vw;
+    font-size: 14vw;
     line-height: 0.95;
     letter-spacing: -0.045em;
     transform: none;

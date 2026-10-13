@@ -34,20 +34,25 @@ const readNameOffsets = () => {
 
 let nameOffsets = readNameOffsets();
 
-const fitStatementTitle = () => {
-  const title = document.querySelector(".statement-title");
-  if (!title) return;
+const fitPhoneLine = (element, sidePad) => {
+  if (!element) return;
   if (!isPhone()) {
-    title.style.fontSize = "";
+    element.style.fontSize = "";
+    element.style.width = "";
     return;
   }
-  const available = Math.max(120, pin.clientWidth - 40);
-  title.style.width = "max-content";
-  title.style.fontSize = "100px";
-  const width = title.getBoundingClientRect().width;
-  title.style.width = "";
+  const available = Math.max(120, pin.clientWidth - sidePad * 2);
+  element.style.width = "max-content";
+  element.style.fontSize = "100px";
+  const width = element.getBoundingClientRect().width;
+  element.style.width = "";
   if (width <= 0) return;
-  title.style.fontSize = `${(100 * available) / width}px`;
+  element.style.fontSize = `${(100 * available) / width}px`;
+};
+
+const fitStatementTitle = () => {
+  fitPhoneLine(document.querySelector(".statement-title"), 20);
+  fitPhoneLine(document.querySelector(".wordmark"), 22);
 };
 
 let safeProbe = null;
