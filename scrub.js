@@ -488,6 +488,7 @@ if (window.visualViewport) {
 }
 
 const peaks = document.querySelector(".peaks");
+if (isPhone() && peaks) peaks.hidden = false;
 const advance = document.querySelector(".advance");
 const prevStep = document.querySelector(".step-prev");
 const nextStep = document.querySelector(".step-next");
@@ -836,10 +837,11 @@ const playFlash = () => {
 };
 
 const openPeaks = (index) => {
+  if (isPhone()) peaks.hidden = false;
   pin.classList.add("is-peaks");
   peaks.hidden = false;
   showPeak(index);
-  playFlash();
+  if (!isPhone()) playFlash();
 };
 
 if (peaks && advance && prevStep && nextStep) {
@@ -885,7 +887,7 @@ if (peaks && advance && prevStep && nextStep) {
   const closePeaks = () => {
     if (moreFog) moreFog.hidden = true;
     pin.classList.remove("is-peaks");
-    peaks.hidden = true;
+    if (!isPhone()) peaks.hidden = true;
     cancelAnimationFrame(peakFrame);
     peakFrame = 0;
     peakIndex = 0;

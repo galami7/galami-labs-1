@@ -1307,6 +1307,20 @@ body {
     inset: auto;
   }
 
+  .peaks[hidden] {
+    display: block;
+  }
+
+  .peaks {
+    opacity: 0;
+    transition: opacity 0.36s ease, visibility 0s linear 0.36s;
+  }
+
+  .pin.is-peaks .peaks {
+    opacity: 1;
+    transition: opacity 0.36s ease, visibility 0s linear 0s;
+  }
+
   .pin .start-still,
   .pin .hero-video,
   .pin .end-still {
