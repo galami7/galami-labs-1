@@ -684,10 +684,10 @@ const inkBox = (element) => {
 };
 
 const textOnSky = (map, rect, pinRect) => {
-  const left = rect.left - pinRect.left - 4;
-  const right = rect.right - pinRect.left - 18;
-  const top = rect.top - pinRect.top + 6;
-  const bottom = rect.bottom - pinRect.top + 10;
+  const left = rect.left - pinRect.left - 2;
+  const right = Math.min(rect.right - pinRect.left - 18, left + 96);
+  const top = rect.top - pinRect.top + 4;
+  const bottom = rect.bottom - pinRect.top + 8;
   if (right <= left) return true;
   for (let y = top; y <= bottom; y += 4) {
     for (let x = left; x <= right; x += 6) {
