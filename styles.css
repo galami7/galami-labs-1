@@ -1425,6 +1425,12 @@ body {
     text-align: center;
   }
 
+  .pin:has(.summit-pilatus:hover) .statement-hint,
+  .pin:has(.summit-pilatus:focus) .statement-hint,
+  .pin:has(.summit-pilatus:focus-visible) .statement-hint {
+    opacity: 1;
+  }
+
   .summit,
   .summit-spot {
     width: 30vw;

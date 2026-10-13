@@ -873,14 +873,18 @@ const openPeaks = (index) => {
 if (peaks && advance && prevStep && nextStep) {
   advance.addEventListener("click", () => openPeaks(0));
   if (summitLayer) {
-    summitLayer.querySelectorAll(".summit").forEach((marker, index) => {
+    let summitHideTimer = 0;
+    summitLayer.querySelectorAll(".summit").forEach((marker) => {
       marker.addEventListener("click", () => {
         requestAnimationFrame(() => marker.blur());
         if (!isPhone() || !pin.classList.contains("is-end") || pin.classList.contains("is-peaks")) return;
         const spot = marker.closest(".summit-spot");
         const shown = spot && spot.classList.contains("is-shown");
+        window.clearTimeout(summitHideTimer);
         summitLayer.querySelectorAll(".summit-spot").forEach((item) => item.classList.remove("is-shown"));
-        if (spot && !shown) spot.classList.add("is-shown");
+        if (!spot || shown) return;
+        spot.classList.add("is-shown");
+        summitHideTimer = window.setTimeout(() => spot.classList.remove("is-shown"), 8000);
       });
     });
   }
