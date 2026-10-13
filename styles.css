@@ -1442,7 +1442,21 @@ body {
     cursor: pointer;
   }
 
-  .pin.is-end:not(.is-peaks) .summit-line {
+  .summit-spot:hover .summit-line,
+  .summit-spot:focus-within .summit-line,
+  .summit:hover .summit-line,
+  .summit:focus-visible .summit-line {
+    height: 0;
+  }
+
+  .summit-spot:hover .summit-label,
+  .summit-spot:focus-within .summit-label,
+  .summit:hover .summit-label,
+  .summit:focus-visible .summit-label {
+    opacity: 0;
+  }
+
+  .pin.is-end:not(.is-peaks) .summit-spot.is-shown .summit-line {
     height: 2.05rem;
     box-shadow: 0 0 6px rgba(8, 22, 48, 0.7);
   }
@@ -1451,7 +1465,7 @@ body {
     transform: translate(calc(-50% + 0.75rem), -100%);
   }
 
-  .pin.is-end:not(.is-peaks) .summit-label {
+  .pin.is-end:not(.is-peaks) .summit-spot.is-shown .summit-label {
     opacity: 1;
   }
 

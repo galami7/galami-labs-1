@@ -874,8 +874,11 @@ if (peaks && advance && prevStep && nextStep) {
   if (summitLayer) {
     summitLayer.querySelectorAll(".summit").forEach((marker, index) => {
       marker.addEventListener("click", () => {
-        if (!isPhone() || !pin.classList.contains("is-end")) return;
-        openPeaks(index);
+        if (!isPhone() || !pin.classList.contains("is-end") || pin.classList.contains("is-peaks")) return;
+        const spot = marker.closest(".summit-spot");
+        const shown = spot && spot.classList.contains("is-shown");
+        summitLayer.querySelectorAll(".summit-spot").forEach((item) => item.classList.remove("is-shown"));
+        if (spot && !shown) spot.classList.add("is-shown");
       });
     });
   }
