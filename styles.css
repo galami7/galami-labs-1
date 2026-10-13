@@ -1504,8 +1504,13 @@ body {
   }
 
   .step {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.45rem;
+    height: 2.45rem;
+  }
+
+  .step svg {
+    width: 1.1rem;
+    height: 1.1rem;
   }
 
   .advance {
