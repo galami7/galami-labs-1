@@ -370,14 +370,12 @@ body {
   visibility: visible;
 }
 
-.range-bleed,
 .phase-bleed,
 .screen-bleed {
   display: none;
 }
 
 .pin .peaks .range,
-.pin .peaks .range-bleed,
 .pin .peaks .peak-close,
 .pin .peaks .range-notes {
   position: absolute;
@@ -394,8 +392,7 @@ body {
   transform: translate3d(calc((100cqi - var(--frame)) / 2 - (var(--peak) + var(--peak-shift)) * var(--frame)), -50%, 0);
 }
 
-.pin .peaks .range,
-.pin .peaks .range-bleed {
+.pin .peaks .range {
   width: calc(var(--frame) * 3);
   max-width: none;
   object-fit: fill;
@@ -1320,7 +1317,8 @@ body {
   }
 
   .screen-bleed-start,
-  .screen-bleed-end {
+  .screen-bleed-end,
+  .screen-bleed-range {
     position: absolute;
     inset: 0;
     background-position: center;
@@ -1339,7 +1337,13 @@ body {
     background-image: url("Mobile Middle Frame 1.0.jpg");
   }
 
-  .pin.is-away .screen-bleed-start {
+  .screen-bleed-range {
+    background-image: url("Long Mountain Range.jpg");
+    background-position: center 42%;
+  }
+
+  .pin.is-end .screen-bleed-start,
+  .pin.is-peaks .screen-bleed-start {
     opacity: 0;
   }
 
@@ -1351,9 +1355,12 @@ body {
     opacity: 1;
   }
 
-  .pin.is-peaks .screen-bleed-start,
   .pin.is-peaks .screen-bleed-end {
     opacity: 0;
+  }
+
+  .pin.is-peaks .screen-bleed-range {
+    opacity: 1;
   }
 
   .pin.is-peaks {
@@ -1508,14 +1515,6 @@ body {
   .pin .peaks .peak-close,
   .next-peak {
     display: none;
-  }
-
-  .pin .peaks .range-bleed {
-    display: block;
-    z-index: -1;
-    height: 100cqb;
-    background: url("Long Mountain Range.jpg") center / 100% 100% no-repeat;
-    filter: blur(34px);
   }
 
   .phase:nth-child(4) {
