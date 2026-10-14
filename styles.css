@@ -1300,7 +1300,7 @@ html.is-video-loading .pin.is-away .start-still {
     top: -24px;
     height: calc(100lvh + 48px);
     background: transparent;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .screen-bleed {
@@ -1385,6 +1385,8 @@ html.is-video-loading .pin.is-away .start-still {
     height: 100%;
     object-fit: cover;
     object-position: center center;
+    transform: scale(1.08);
+    transform-origin: center center;
   }
 
   .wordmark {
