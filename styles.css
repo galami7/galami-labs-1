@@ -63,6 +63,16 @@ body {
   z-index: 3;
 }
 
+html.is-video-loading .start-still {
+  filter: blur(var(--load-blur, 18px));
+  transform: scale(1.05);
+  transition: filter 0.4s linear;
+}
+
+html.is-video-loading .pin.is-away .start-still {
+  visibility: visible;
+}
+
 .phone-load {
   display: none;
 }
@@ -444,10 +454,6 @@ body {
   text-align: left;
   pointer-events: none;
   text-shadow: 0 1px 10px rgba(8, 28, 64, 0.28);
-}
-
-.explore-more {
-  display: none;
 }
 
 .next-peak {
@@ -1276,16 +1282,6 @@ body {
     overscroll-behavior: none;
   }
 
-  html.is-video-loading .start-still {
-    filter: blur(var(--load-blur, 18px));
-    transform: scale(1.05);
-    transition: filter 0.4s linear;
-  }
-
-  html.is-video-loading .pin.is-away .start-still {
-    visibility: visible;
-  }
-
   .hint-hover {
     display: none;
   }
@@ -1550,22 +1546,6 @@ body {
 
   .next-peak {
     display: none;
-  }
-
-  .explore-more {
-    display: block;
-    position: absolute;
-    z-index: 3;
-    left: calc(50% - 50vw + 1.15rem + env(safe-area-inset-left, 0px));
-    bottom: calc(22svh + var(--chrome-bottom, env(safe-area-inset-bottom, 0px)));
-    color: #fff;
-    font: 500 0.92rem/1.2 system-ui, sans-serif;
-    letter-spacing: 0.01em;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.22em;
-    text-shadow: 0 1px 8px rgba(8, 28, 64, 0.35);
-    pointer-events: auto;
   }
 
   .contact-card {

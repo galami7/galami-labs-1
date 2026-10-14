@@ -461,11 +461,7 @@ const enableVideo = () => {
   video.setAttribute("playsinline", "");
   video.setAttribute("webkit-playsinline", "");
   video.poster = isPhone() ? "Mobile First Frame.jpg" : "trial-first.jpg";
-  if (isPhone()) {
-    loadEntireVideo(source);
-    return;
-  }
-  video.src = source;
+  loadEntireVideo(source);
 };
 
 if (reduceMotion.matches) finishPhoneLoad();
