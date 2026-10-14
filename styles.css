@@ -1291,71 +1291,22 @@ html.is-video-loading .pin.is-away .start-still {
   }
 
   .pin {
-    --band-top: 24px;
+    --band-top: 0px;
     --band-bottom: 24px;
-    --chrome-top: calc(var(--band-top) + env(safe-area-inset-top, 0px));
+    --chrome-top: env(safe-area-inset-top, 0px);
     --chrome-bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom, 0px));
     position: sticky;
     z-index: 1;
-    top: -24px;
-    height: calc(100lvh + 48px);
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100lvh;
     background: transparent;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .screen-bleed {
-    display: block;
-    position: fixed;
-    z-index: 0;
-    inset: -8%;
-    pointer-events: none;
-  }
-
-  .screen-bleed-start,
-  .screen-bleed-end,
-  .screen-bleed-range {
-    position: absolute;
-    inset: 0;
-    background-position: center;
-    background-size: cover;
-    filter: blur(28px);
-    transform: scale(1.08);
-    opacity: 0;
-  }
-
-  .screen-bleed-start {
-    background-image: url("Mobile First Frame.jpg");
-    opacity: 1;
-  }
-
-  .screen-bleed-end {
-    background-image: url("Mobile Middle Frame 1.0.jpg");
-  }
-
-  .screen-bleed-range {
-    background-image: url("Long Mountain Range.jpg");
-    background-position: center 42%;
-  }
-
-  .pin.is-end .screen-bleed-start,
-  .pin.is-peaks .screen-bleed-start {
-    opacity: 0;
-  }
-
-  html.is-video-loading .screen-bleed-start {
-    opacity: 1;
-  }
-
-  .pin.is-end:not(.is-peaks) .screen-bleed-end {
-    opacity: 1;
-  }
-
-  .pin.is-peaks .screen-bleed-end {
-    opacity: 0;
-  }
-
-  .pin.is-peaks .screen-bleed-range {
-    opacity: 1;
+    display: none;
   }
 
   .pin.is-peaks {
@@ -1385,12 +1336,12 @@ html.is-video-loading .pin.is-away .start-still {
     height: 100%;
     object-fit: cover;
     object-position: center center;
-    transform: scale(1.08);
+    transform: none;
     transform-origin: center center;
   }
 
   .wordmark {
-    top: max(calc(var(--band-top, 24px) + 21svh), calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.85rem));
+    top: max(21svh, calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.85rem));
     left: 0;
     right: 0;
     padding: 0;
@@ -1402,7 +1353,7 @@ html.is-video-loading .pin.is-away .start-still {
   }
 
   .statement {
-    top: max(calc(var(--band-top, 24px) + 4.6svh), calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.35rem));
+    top: max(4.6svh, calc(var(--chrome-top, env(safe-area-inset-top, 0px)) + 0.85rem));
     padding: 0 1.25rem;
     text-align: center;
   }

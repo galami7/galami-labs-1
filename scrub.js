@@ -9,10 +9,7 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const phoneQuery = window.matchMedia("(max-aspect-ratio: 4/5)");
 const isPhone = () => phoneQuery.matches;
 
-const phoneBand = () => {
-  if (!isPhone()) return { top: 0, bottom: 0 };
-  return { top: 24, bottom: 24 };
-};
+const phoneBand = () => ({ top: 0, bottom: 0 });
 
 const nameKey = "galami-phone-names";
 const nameAdjust = new URLSearchParams(location.search).has("names");
@@ -81,19 +78,17 @@ const endScroll = () => {
   return isPhone() ? Math.max(0, end - 1) : end;
 };
 
-const runway = () => (isPhone() ? Math.min(phoneBand().top, endScroll()) : 0);
+const runway = () => 0;
 const maxScroll = () => endScroll();
 
 const progress = () => {
-  const start = runway();
-  const distance = maxScroll() - start;
+  const distance = maxScroll();
   if (distance <= 0) return 0;
-  return Math.min(1, Math.max(0, (window.scrollY - start) / distance));
+  return Math.min(1, Math.max(0, window.scrollY / distance));
 };
 
 const parkAtStart = () => {
-  const offset = runway();
-  if (window.scrollY < offset) window.scrollTo(0, offset);
+  if (window.scrollY < 0) window.scrollTo(0, 0);
 };
 
 const fitPhonePin = () => {
@@ -111,22 +106,20 @@ const fitPhonePin = () => {
     return;
   }
 
-  const band = phoneBand();
   const safe = readSafeInsets();
   const viewport = window.visualViewport;
   const topBar = viewport ? viewport.offsetTop : 0;
   const bottomBar = viewport ? Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height) : 0;
   pin.style.position = "sticky";
-  pin.style.top = `${-band.top}px`;
-  pin.style.left = "0";
+  pin.style.top = "0px";
+  pin.style.left = "0px";
   pin.style.width = "100%";
-  pin.style.height = `${window.innerHeight + band.top + band.bottom}px`;
-  pin.style.setProperty("--band-top", `${band.top}px`);
-  pin.style.setProperty("--band-bottom", `${band.bottom}px`);
-  pin.style.setProperty("--chrome-top", `${band.top + topBar + safe.top}px`);
-  pin.style.setProperty("--chrome-bottom", `${band.bottom + Math.max(bottomBar, safe.bottom)}px`);
+  pin.style.height = "";
+  pin.style.setProperty("--band-top", "0px");
+  pin.style.setProperty("--band-bottom", "24px");
+  pin.style.setProperty("--chrome-top", `${Math.max(topBar, safe.top)}px`);
+  pin.style.setProperty("--chrome-bottom", `${24 + Math.max(bottomBar, safe.bottom)}px`);
   fitStatementTitle();
-  parkAtStart();
 };
 
 const updateChrome = () => {
