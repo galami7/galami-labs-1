@@ -366,6 +366,7 @@ html.is-video-loading .pin.is-away .start-still {
 
 .peaks {
   --peak: 0;
+  --peak-shift: 0;
   --frame: max(100cqi, calc(100cqb * 16 / 9));
   position: absolute;
   inset: 0;
@@ -396,6 +397,10 @@ html.is-video-loading .pin.is-away .start-still {
   will-change: transform;
 }
 
+.pin .peaks .peak-close {
+  transform: translate3d(calc((100cqi - var(--frame)) / 2 - (var(--peak) + var(--peak-shift)) * var(--frame)), -50%, 0);
+}
+
 .pin .peaks .range {
   width: calc(var(--frame) * 3);
   max-width: none;
@@ -403,8 +408,8 @@ html.is-video-loading .pin.is-away .start-still {
 }
 
 .pin .peaks .peak-close {
-  left: calc(var(--frame) * 3 - 2px);
-  width: calc(var(--frame) + 2px);
+  left: calc(var(--frame) * 3);
+  width: var(--frame);
   object-fit: cover;
 }
 
@@ -1510,6 +1515,10 @@ html.is-video-loading .pin.is-away .start-still {
     touch-action: none;
     outline: 1px dashed rgba(255, 255, 255, 0.8);
     outline-offset: 0.4rem;
+  }
+
+  .peaks {
+    --peak-shift: 0.11;
   }
 
   .phase-copy {
