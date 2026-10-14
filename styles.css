@@ -397,20 +397,18 @@ html.is-video-loading .pin.is-away .start-still {
   will-change: transform;
 }
 
-.pin .peaks .peak-close {
-  transform: translate3d(calc((100cqi - var(--frame)) / 2 - (var(--peak) + var(--peak-shift)) * var(--frame)), -50%, 0);
-}
-
 .pin .peaks .range {
   width: calc(var(--frame) * 3);
   max-width: none;
   object-fit: fill;
+  transform: translate3d(calc((100cqi - var(--frame)) / 2 - min(2, var(--peak)) * var(--frame)), -50%, 0);
 }
 
 .pin .peaks .peak-close {
-  left: calc(var(--frame) * 3);
   width: var(--frame);
   object-fit: cover;
+  opacity: clamp(0, calc(var(--peak) - 2), 1);
+  transform: translate3d(calc((100cqi - var(--frame)) / 2 - var(--peak-shift) * var(--frame)), -50%, 0);
 }
 
 .pin .peaks .range-notes {
