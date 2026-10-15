@@ -124,6 +124,53 @@ const fitPhonePin = () => {
   fitStatementTitle();
 };
 
+let pointerX = 0;
+let pointerY = 0;
+let pointerKnown = false;
+let hoverArmed = false;
+
+const rememberPointer = (event) => {
+  if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
+  pointerX = event.clientX;
+  pointerY = event.clientY;
+  pointerKnown = true;
+};
+
+const clearRestingHover = () => {
+  document.querySelectorAll(".summit-spot.is-resting, .summit.is-resting").forEach((el) => {
+    el.classList.remove("is-resting");
+  });
+};
+
+const holdAccidentalHover = () => {
+  const active = pin.classList.contains("is-end") && !pin.classList.contains("is-peaks") && !isPhone();
+  if (!active) {
+    hoverArmed = false;
+    clearRestingHover();
+    return;
+  }
+  if (hoverArmed) return;
+  hoverArmed = true;
+  if (!pointerKnown) return;
+  const hit = document.elementFromPoint(pointerX, pointerY);
+  const spot = hit && hit.closest(".summit-spot");
+  if (!spot) return;
+  spot.classList.add("is-resting");
+  const button = spot.querySelector(".summit");
+  if (button) button.classList.add("is-resting");
+};
+
+document.querySelectorAll(".summit").forEach((button) => {
+  button.addEventListener("pointerleave", () => {
+    const spot = button.closest(".summit-spot");
+    if (spot) spot.classList.remove("is-resting");
+    button.classList.remove("is-resting");
+  });
+});
+window.addEventListener("pointermove", rememberPointer, { passive: true });
+window.addEventListener("pointerdown", rememberPointer, { passive: true });
+window.addEventListener("wheel", rememberPointer, { passive: true });
+
 const updateChrome = () => {
   const amount = progress();
   const atEnd = amount > 0.98;
@@ -134,6 +181,7 @@ const updateChrome = () => {
   endStill.setAttribute("aria-hidden", atEnd ? "false" : "true");
   nextButton.disabled = !atStart;
   nextButton.setAttribute("aria-hidden", atStart ? "false" : "true");
+  holdAccidentalHover();
   syncPeaks();
 };
 

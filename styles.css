@@ -265,6 +265,21 @@ html.is-video-loading .pin.is-away .start-still {
   opacity: 1;
 }
 
+.summit-spot.is-resting:hover .summit-line,
+.summit.is-resting:hover .summit-line,
+.summit-spot.is-resting:has(.summit-pilatus):hover .summit-line {
+  height: 0;
+}
+
+.summit-spot.is-resting:hover .summit-label,
+.summit.is-resting:hover .summit-label {
+  opacity: 0;
+}
+
+.pin:has(.summit-pilatus.is-resting:hover) .statement-hint {
+  opacity: 1;
+}
+
 .wordmark {
   position: absolute;
   z-index: 3;
