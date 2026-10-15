@@ -160,14 +160,10 @@ const holdAccidentalHover = () => {
   if (button) button.classList.add("is-resting");
 };
 
-document.querySelectorAll(".summit").forEach((button) => {
-  button.addEventListener("pointerleave", () => {
-    const spot = button.closest(".summit-spot");
-    if (spot) spot.classList.remove("is-resting");
-    button.classList.remove("is-resting");
-  });
-});
-window.addEventListener("pointermove", rememberPointer, { passive: true });
+window.addEventListener("pointermove", (event) => {
+  if (hoverArmed && (event.clientX !== pointerX || event.clientY !== pointerY)) clearRestingHover();
+  rememberPointer(event);
+}, { passive: true });
 window.addEventListener("pointerdown", rememberPointer, { passive: true });
 window.addEventListener("wheel", rememberPointer, { passive: true });
 
