@@ -1468,8 +1468,13 @@ html.is-video-loading .pin.is-away .start-still {
     outline-offset: 0.4rem;
   }
 
+  .peaks {
+    --peak-shift: 0.11;
+  }
+
   .pin .peaks .range {
     width: calc(var(--frame) * 4);
+    transform: translate3d(calc((100cqi - var(--frame)) / 2 - (var(--peak) + max(0, var(--peak) - 2) * var(--peak-shift)) * var(--frame)), -50%, 0);
   }
 
   .pin .peaks .peak-close {
