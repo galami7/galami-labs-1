@@ -11,6 +11,9 @@
       if (matchMedia("(max-aspect-ratio: 4/5)").matches) {
         document.documentElement.classList.add("is-phone");
       }
+      if (/iPhone|iPod/.test(navigator.userAgent)) {
+        document.documentElement.classList.add("is-iphone");
+      }
     </script>
     <style>
       .home .start-still,

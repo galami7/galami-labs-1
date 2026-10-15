@@ -8,6 +8,8 @@ const nextButton = document.querySelector(".next");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const phoneQuery = window.matchMedia("(max-aspect-ratio: 4/5)");
 const isPhone = () => phoneQuery.matches;
+const isIphone = /iPhone|iPod/.test(navigator.userAgent);
+if (isIphone) document.documentElement.classList.add("is-iphone");
 
 const phoneBand = () => ({ top: 0, bottom: 0 });
 
@@ -88,7 +90,7 @@ const progress = () => {
 };
 
 const parkAtStart = () => {
-  if (window.scrollY < 0) window.scrollTo(0, 0);
+  if (window.scrollY < 0) scrollToY(0);
 };
 
 const fitPhonePin = () => {
@@ -139,7 +141,18 @@ let frame = -1;
 let queued = false;
 let playing = false;
 let driving = false;
+let playDirection = 0;
 let playFrame = 0;
+let scrollAnchor = window.scrollY;
+let scripted = false;
+let correcting = false;
+
+const scrollToY = (y) => {
+  scrollAnchor = y;
+  scripted = true;
+  window.scrollTo(0, y);
+  scripted = false;
+};
 
 // v8 plays forward instead of jumping between frames.
 // Hands lower from about 1.3s to 2.9s, at half speed. The rest runs at double speed.
@@ -209,9 +222,11 @@ const requestSeek = () => {
 const stopPlayback = () => {
   playing = false;
   driving = false;
+  playDirection = 0;
   cancelAnimationFrame(playFrame);
   video.pause();
   video.playbackRate = 1;
+  scrollAnchor = window.scrollY;
 };
 
 const playHands = () => {
@@ -236,14 +251,15 @@ const playHands = () => {
     }
     const amount = Math.min(1, video.currentTime / duration);
     const travel = Math.max(0, maxScroll() - runway());
-    window.scrollTo(0, runway() + scrollProgressForVideo(amount) * travel);
+    scrollToY(runway() + scrollProgressForVideo(amount) * travel);
 
     if (video.ended || amount >= 0.995) {
-      driving = false;
-      playing = false;
       video.pause();
       video.playbackRate = 1;
-      window.scrollTo(0, maxScroll());
+      scrollToY(maxScroll());
+      driving = false;
+      playing = false;
+      playDirection = 0;
       updateChrome();
       return;
     }
@@ -256,6 +272,7 @@ const playHands = () => {
     started.catch(() => {
       driving = false;
       playing = false;
+      playDirection = 0;
     });
   }
   playFrame = requestAnimationFrame(follow);
@@ -271,6 +288,7 @@ const playToEnd = () => {
 
   stopPlayback();
   playing = true;
+  playDirection = 1;
   pin.classList.add("is-away");
   nextButton.disabled = true;
 
@@ -281,20 +299,29 @@ const playToEnd = () => {
 
   const start = window.scrollY;
   const target = maxScroll();
-  const duration = 2000;
+  const travel = Math.max(1, target - runway());
+  const duration = ((target - start) / travel) * 2000;
+  if (duration < 16) {
+    scrollToY(target);
+    playing = false;
+    playDirection = 0;
+    updateChrome();
+    return;
+  }
   const startedAt = performance.now();
 
   const step = (now) => {
     if (!playing) return;
     const t = Math.min(1, (now - startedAt) / duration);
-    window.scrollTo(0, start + (target - start) * t);
+    scrollToY(start + (target - start) * t);
     requestSeek();
     if (t < 1) {
       playFrame = requestAnimationFrame(step);
       return;
     }
+    scrollToY(target);
     playing = false;
-    window.scrollTo(0, target);
+    playDirection = 0;
     updateChrome();
   };
 
@@ -304,36 +331,49 @@ const playToEnd = () => {
 const playToStart = () => {
   if (reduceMotion.matches || maxScroll() === 0) {
     stopPlayback();
-    window.scrollTo(0, runway());
+    scrollToY(runway());
     updateChrome();
     return;
   }
 
   stopPlayback();
   playing = true;
+  playDirection = -1;
   const start = window.scrollY;
   const target = runway();
-  const duration = 2000;
+  const travel = Math.max(1, maxScroll() - runway());
+  const duration = ((start - target) / travel) * 2000;
+  if (duration < 16) {
+    scrollToY(target);
+    playing = false;
+    playDirection = 0;
+    updateChrome();
+    return;
+  }
   const startedAt = performance.now();
 
   const step = (now) => {
     if (!playing) return;
     const t = Math.min(1, (now - startedAt) / duration);
-    window.scrollTo(0, start + (target - start) * t);
+    scrollToY(start + (target - start) * t);
     requestSeek();
     if (t < 1) {
       playFrame = requestAnimationFrame(step);
       return;
     }
+    scrollToY(target);
     playing = false;
-    window.scrollTo(0, target);
+    playDirection = 0;
     updateChrome();
   };
 
   playFrame = requestAnimationFrame(step);
 };
 
-nextButton.addEventListener("click", playToEnd);
+nextButton.addEventListener("click", () => {
+  if (playDirection === 1) return;
+  playToEnd();
+});
 window.addEventListener("touchstart", () => {
   if (!video || video.readyState < 2) return;
   const started = video.play();
@@ -345,12 +385,6 @@ window.addEventListener("touchstart", () => {
   if (started && typeof started.then === "function") started.then(unlock).catch(unlock);
   else unlock();
 }, { once: true, passive: true });
-window.addEventListener("wheel", () => {
-  if (playing) stopPlayback();
-}, { passive: true });
-window.addEventListener("touchmove", () => {
-  if (playing) stopPlayback();
-}, { passive: true });
 
 let videoReady = false;
 let videoBound = false;
@@ -462,7 +496,6 @@ if (reduceMotion.matches) finishPhoneLoad();
 fitPhonePin();
 if (!reduceMotion.matches) enableVideo();
 
-window.addEventListener("scroll", requestSeek, { passive: true });
 window.addEventListener("resize", () => {
   fitPhonePin();
   if (!reduceMotion.matches) enableVideo();
@@ -485,7 +518,156 @@ const summitLayer = document.querySelector(".summits");
 const peakExit = document.querySelector(".peak-exit");
 const replay = document.querySelector(".replay");
 const peakDots = document.querySelector(".peak-dots");
-if (replay) replay.addEventListener("click", playToStart);
+if (replay) {
+  replay.addEventListener("click", () => {
+    replay.classList.remove("is-hint");
+    playToStart();
+  });
+  replay.addEventListener("animationend", (event) => {
+    if (event.target === replay) replay.classList.remove("is-hint");
+  });
+}
+
+// Downward scrolling plays the down-button animation at that same pace.
+// Upward scrolling stays put and points at the replay button, except on iPhone.
+const wheelPixels = (event) => {
+  const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+  return event.deltaY * unit;
+};
+
+const playForward = () => {
+  if (playDirection === 1) return;
+  if (pin.classList.contains("is-peaks")) return;
+  if (progress() > 0.98) return;
+  playToEnd();
+};
+
+let hintTimer = 0;
+
+const emphasizeReplay = () => {
+  if (!replay || replay.hidden || pin.classList.contains("is-peaks")) return;
+  if (playing || driving || replay.classList.contains("is-hint")) return;
+  replay.classList.add("is-hint");
+  window.clearTimeout(hintTimer);
+  hintTimer = window.setTimeout(() => replay.classList.remove("is-hint"), 2400);
+};
+
+const onWheel = (event) => {
+  if (pin.classList.contains("is-peaks")) return;
+  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+  const delta = wheelPixels(event);
+  if (!delta) return;
+  if (isIphone && delta < 0) {
+    if (playing || driving) stopPlayback();
+    return;
+  }
+  if (event.cancelable) event.preventDefault();
+  if (delta > 4) playForward();
+  else if (delta < -4) emphasizeReplay();
+};
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchDir = 0;
+let gestureAnchor = 0;
+
+const controlTarget = (event) => {
+  const target = event.target;
+  return Boolean(target && target.closest && target.closest("input, textarea, select, a, .next, .advance, .replay, .step, .peak-exit, .peak-dots, .contact-email, .is-adjustable"));
+};
+
+const onTouchStart = (event) => {
+  if (event.touches.length !== 1) {
+    touchDir = 0;
+    return;
+  }
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+  gestureAnchor = window.scrollY;
+  touchDir = 0;
+};
+
+const onTouchMove = (event) => {
+  if (pin.classList.contains("is-peaks")) return;
+  if (event.touches.length !== 1) return;
+  if (controlTarget(event)) return;
+  const dx = event.touches[0].clientX - touchStartX;
+  const dy = event.touches[0].clientY - touchStartY;
+  if (!touchDir) {
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+      if (!isIphone && event.cancelable) event.preventDefault();
+      return;
+    }
+    touchDir = Math.abs(dx) > Math.abs(dy) * 1.2 ? 2 : (dy < 0 ? 1 : -1);
+  }
+  if (touchDir === 2) {
+    if (!isIphone && event.cancelable) event.preventDefault();
+    return;
+  }
+  if (touchDir > 0) {
+    if (event.cancelable) event.preventDefault();
+    if (playDirection === 1) return;
+    if (Math.abs(window.scrollY - gestureAnchor) > 1) scrollToY(gestureAnchor);
+    playForward();
+    return;
+  }
+  if (isIphone) {
+    if (playing || driving) stopPlayback();
+    return;
+  }
+  if (event.cancelable) event.preventDefault();
+  emphasizeReplay();
+};
+
+const onKey = (event) => {
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
+  if (pin.classList.contains("is-peaks")) return;
+  if (controlTarget(event)) return;
+  const down = event.key === "ArrowDown" || event.key === "PageDown" || event.key === " " || event.key === "End";
+  const up = event.key === "ArrowUp" || event.key === "PageUp" || event.key === "Home";
+  if (!down && !up) return;
+  if (up && isIphone) return;
+  event.preventDefault();
+  if (down) playForward();
+  else emphasizeReplay();
+};
+
+const onScroll = () => {
+  if (correcting || scripted || playing || driving) {
+    if (!scripted && (playing || driving)) scrollAnchor = window.scrollY;
+    requestSeek();
+    return;
+  }
+  if (pin.classList.contains("is-peaks")) {
+    if (Math.abs(window.scrollY - scrollAnchor) > 0.5) {
+      correcting = true;
+      window.scrollTo(0, scrollAnchor);
+      correcting = false;
+    }
+    return;
+  }
+  const delta = window.scrollY - scrollAnchor;
+  if (Math.abs(delta) <= 0.5) {
+    requestSeek();
+    return;
+  }
+  if (isIphone && delta < 0) {
+    scrollAnchor = window.scrollY;
+    requestSeek();
+    return;
+  }
+  correcting = true;
+  window.scrollTo(0, scrollAnchor);
+  correcting = false;
+  if (delta > 16) playForward();
+  else if (delta < -16) emphasizeReplay();
+};
+
+document.addEventListener("wheel", onWheel, { passive: false, capture: true });
+document.addEventListener("touchstart", onTouchStart, { passive: true, capture: true });
+document.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
+document.addEventListener("keydown", onKey);
+window.addEventListener("scroll", onScroll, { passive: true });
 const moreFog = document.querySelector(".more-fog");
 const peakReadout = document.querySelector(".peak-readout");
 const peakHeights = ["1,798 m", "2,128 m", "4,478 m"];
@@ -814,7 +996,10 @@ function syncPeaks() {
   const open = pin.classList.contains("is-peaks");
   const atEnd = pin.classList.contains("is-end");
   advance.hidden = open || !atEnd;
-  if (replay) replay.hidden = open || !atEnd;
+  if (replay) {
+    replay.hidden = open || !atEnd;
+    if (replay.hidden) replay.classList.remove("is-hint");
+  }
   if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
   if (nextStep) nextStep.hidden = !open || peakIndex >= peakCount - 1;
   if (peakDots) {
