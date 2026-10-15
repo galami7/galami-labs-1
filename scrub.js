@@ -595,7 +595,11 @@ const onTouchMove = (event) => {
   const dy = event.touches[0].clientY - touchStartY;
   if (!touchDir) {
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
-      if (!isIphone && event.cancelable) event.preventDefault();
+      const scrollingDown = dy < -2;
+      const scrollingUp = dy > 2;
+      if (event.cancelable && (scrollingDown || (!isIphone && (scrollingUp || Math.abs(dx) > 2)))) {
+        event.preventDefault();
+      }
       return;
     }
     touchDir = Math.abs(dx) > Math.abs(dy) * 1.2 ? 2 : (dy < 0 ? 1 : -1);

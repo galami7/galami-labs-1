@@ -1666,6 +1666,7 @@ html.is-video-loading .pin.is-away .start-still {
   .step,
   .step svg,
   .replay,
+  .replay.is-hint,
   .peak-exit,
   .more-fog,
   .contact-email button,
