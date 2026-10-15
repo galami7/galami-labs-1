@@ -552,6 +552,9 @@ const emphasizeReplay = () => {
   hintTimer = window.setTimeout(() => replay.classList.remove("is-hint"), 2400);
 };
 
+let wheelCarry = 0;
+let wheelCarryAt = 0;
+
 const onWheel = (event) => {
   if (pin.classList.contains("is-peaks")) return;
   if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
@@ -562,8 +565,17 @@ const onWheel = (event) => {
     return;
   }
   if (event.cancelable) event.preventDefault();
-  if (delta > 4) playForward();
-  else if (delta < -4) emphasizeReplay();
+  const now = performance.now();
+  if (now - wheelCarryAt > 180 || Math.sign(delta) !== Math.sign(wheelCarry)) wheelCarry = 0;
+  wheelCarry = wheelCarry + delta;
+  wheelCarryAt = now;
+  if (wheelCarry >= 4) {
+    wheelCarry = 0;
+    playForward();
+  } else if (wheelCarry <= -4) {
+    wheelCarry = 0;
+    emphasizeReplay();
+  }
 };
 
 let touchStartX = 0;
@@ -594,14 +606,7 @@ const onTouchMove = (event) => {
   const dx = event.touches[0].clientX - touchStartX;
   const dy = event.touches[0].clientY - touchStartY;
   if (!touchDir) {
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
-      const scrollingDown = dy < -2;
-      const scrollingUp = dy > 2;
-      if (event.cancelable && (scrollingDown || (!isIphone && (scrollingUp || Math.abs(dx) > 2)))) {
-        event.preventDefault();
-      }
-      return;
-    }
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
     touchDir = Math.abs(dx) > Math.abs(dy) * 1.2 ? 2 : (dy < 0 ? 1 : -1);
   }
   if (touchDir === 2) {
@@ -637,8 +642,16 @@ const onKey = (event) => {
 };
 
 const onScroll = () => {
-  if (correcting || scripted || playing || driving) {
-    if (!scripted && (playing || driving)) scrollAnchor = window.scrollY;
+  if (correcting || scripted) {
+    requestSeek();
+    return;
+  }
+  if (playing || driving) {
+    if (Math.abs(window.scrollY - scrollAnchor) > 0.5) {
+      correcting = true;
+      window.scrollTo(0, scrollAnchor);
+      correcting = false;
+    }
     requestSeek();
     return;
   }
