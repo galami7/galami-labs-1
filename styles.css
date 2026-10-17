@@ -1200,9 +1200,10 @@ html.is-video-loading .pin.is-away .start-still {
 }
 
 .more-email {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.22em;
+  justify-content: center;
   max-width: 100%;
   white-space: nowrap;
 }
@@ -1213,6 +1214,9 @@ html.is-video-loading .pin.is-away .start-still {
 }
 
 .copy-email {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 0.22em);
   display: inline-grid;
   place-items: center;
   flex: none;
@@ -1230,6 +1234,7 @@ html.is-video-loading .pin.is-away .start-still {
   cursor: pointer;
   user-select: none;
   text-shadow: none;
+  transform: translateY(-50%);
   filter: drop-shadow(0 1px 8px rgba(8, 28, 64, 0.28));
 }
 
@@ -1249,7 +1254,7 @@ html.is-video-loading .pin.is-away .start-still {
 
 .copy-email:hover,
 .copy-email:focus-visible {
-  transform: scale(1.08);
+  transform: translateY(-50%) scale(1.08);
 }
 
 .copy-email.is-copied {
@@ -1263,7 +1268,8 @@ html.is-video-loading .pin.is-away .start-still {
   text-underline-offset: 0.16em;
 }
 
-.more-sign {
+.more-sign,
+.copy-note {
   position: absolute;
   left: 1.25rem;
   right: 1.25rem;
@@ -1273,6 +1279,14 @@ html.is-video-loading .pin.is-away .start-still {
   font: 500 0.98rem/1.35 system-ui, sans-serif;
   letter-spacing: 0.01em;
   text-shadow: 0 1px 10px rgba(8, 28, 64, 0.28);
+}
+
+.copy-note[hidden] {
+  display: none;
+}
+
+.more-fog.is-copied .more-sign {
+  visibility: hidden;
 }
 
 .advance[hidden],

@@ -1192,6 +1192,7 @@ if (peaks && advance && prevStep && nextStep) {
   }
   const closeMore = () => {
     if (!moreFog || moreFog.hidden) return;
+    clearCopyNote();
     moreFog.hidden = true;
     syncPeaks();
   };
@@ -1201,6 +1202,7 @@ if (peaks && advance && prevStep && nextStep) {
     syncPeaks();
   };
   const closePeaks = () => {
+    clearCopyNote();
     if (moreFog) moreFog.hidden = true;
     pin.classList.remove("is-peaks");
     cancelAnimationFrame(peakFrame);
@@ -1221,6 +1223,17 @@ if (peaks && advance && prevStep && nextStep) {
     });
   }
   const copyEmail = document.querySelector(".copy-email");
+  const copyNote = document.querySelector(".copy-note");
+  let copyTimer = 0;
+  const clearCopyNote = () => {
+    window.clearTimeout(copyTimer);
+    if (copyEmail) {
+      copyEmail.classList.remove("is-copied");
+      copyEmail.setAttribute("aria-label", "Copy email address");
+    }
+    if (moreFog) moreFog.classList.remove("is-copied");
+    if (copyNote) copyNote.hidden = true;
+  };
   if (copyEmail) {
     copyEmail.addEventListener("click", async (event) => {
       event.preventDefault();
@@ -1242,10 +1255,10 @@ if (peaks && advance && prevStep && nextStep) {
       }
       copyEmail.classList.add("is-copied");
       copyEmail.setAttribute("aria-label", "Email copied");
-      window.setTimeout(() => {
-        copyEmail.classList.remove("is-copied");
-        copyEmail.setAttribute("aria-label", "Copy email address");
-      }, 1400);
+      if (moreFog) moreFog.classList.add("is-copied");
+      if (copyNote) copyNote.hidden = false;
+      window.clearTimeout(copyTimer);
+      copyTimer = window.setTimeout(clearCopyNote, 2200);
     });
   }
   if (moreFog) {
