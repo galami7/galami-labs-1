@@ -1048,7 +1048,7 @@ function syncPeaks() {
   const atEnd = pin.classList.contains("is-end");
   advance.hidden = open || !atEnd;
   if (peaks && !isPhone()) {
-    peaks.hidden = !open && !atEnd;
+    peaks.hidden = !open && !atEnd && !pin.classList.contains("is-warm");
     if (atEnd) warmPeaks();
   }
   if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
