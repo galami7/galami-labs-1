@@ -222,12 +222,6 @@
             <path d="M18.5 12H8.5M12.5 7.5 7.5 12l5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
-        <button type="button" class="replay" hidden aria-label="Replay">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M3 3v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
         <button type="button" class="peak-exit" hidden aria-label="Back to the mountains">
           <svg class="peak-exit-mark" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
@@ -238,7 +232,15 @@
         </button>
         <div class="more-fog" hidden>
           <nav class="more-links" aria-label="Contact">
-            <a href="mailto:guillaume.gruyters@gmail.com">Email</a>
+            <span class="more-email">
+              <a href="mailto:guillaume.gruyters@gmail.com">Email</a>
+              <button type="button" class="copy-email" data-email="guillaume.gruyters@gmail.com" aria-label="Copy email address">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="8.5" y="8.5" width="11" height="11" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M6.2 15.2H5.4A1.4 1.4 0 0 1 4 13.8V5.4A1.4 1.4 0 0 1 5.4 4h8.4A1.4 1.4 0 0 1 15.2 5.4V6.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </span>
             <a href="https://www.linkedin.com/in/guillaume-gruyters/" target="_blank" rel="noreferrer">LinkedIn</a>
             <a href="https://www.guillaumegruyters.com/" target="_blank" rel="noreferrer">Personal website</a>
           </nav>

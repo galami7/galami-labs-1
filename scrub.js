@@ -118,9 +118,9 @@ const fitPhonePin = () => {
   pin.style.width = "100%";
   pin.style.height = "";
   pin.style.setProperty("--band-top", "0px");
-  pin.style.setProperty("--band-bottom", "24px");
+  pin.style.setProperty("--band-bottom", "0px");
   pin.style.setProperty("--chrome-top", `${Math.max(topBar, safe.top)}px`);
-  pin.style.setProperty("--chrome-bottom", `${24 + Math.max(bottomBar, safe.bottom)}px`);
+  pin.style.setProperty("--chrome-bottom", `${Math.max(bottomBar, safe.bottom)}px`);
   fitStatementTitle();
 };
 
@@ -560,20 +560,11 @@ const prevStep = document.querySelector(".step-prev");
 const nextStep = document.querySelector(".step-next");
 const summitLayer = document.querySelector(".summits");
 const peakExit = document.querySelector(".peak-exit");
-const replay = document.querySelector(".replay");
 const peakDots = document.querySelector(".peak-dots");
-if (replay) {
-  replay.addEventListener("click", () => {
-    replay.classList.remove("is-hint");
-    playToStart();
-  });
-  replay.addEventListener("animationend", (event) => {
-    if (event.target === replay) replay.classList.remove("is-hint");
-  });
-}
 
-// Downward scrolling plays the down-button animation at that same pace.
-// Upward scrolling stays put and points at the replay button, except on iPhone.
+// Downward scrolling plays through to the mountains.
+// Upward scrolling plays that same animation backward and settles at the top.
+// iPhone keeps native upward scrolling, which already scrubs the film back.
 const wheelPixels = (event) => {
   const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
   return event.deltaY * unit;
@@ -586,14 +577,11 @@ const playForward = () => {
   playToEnd();
 };
 
-let hintTimer = 0;
-
-const emphasizeReplay = () => {
-  if (!replay || replay.hidden || pin.classList.contains("is-peaks")) return;
-  if (playing || driving || replay.classList.contains("is-hint")) return;
-  replay.classList.add("is-hint");
-  window.clearTimeout(hintTimer);
-  hintTimer = window.setTimeout(() => replay.classList.remove("is-hint"), 2400);
+const playBackward = () => {
+  if (playDirection === -1) return;
+  if (pin.classList.contains("is-peaks")) return;
+  if (progress() <= 0.02 && !playing && !driving) return;
+  playToStart();
 };
 
 let wheelCarry = 0;
@@ -618,7 +606,7 @@ const onWheel = (event) => {
     playForward();
   } else if (wheelCarry <= -4) {
     wheelCarry = 0;
-    emphasizeReplay();
+    playBackward();
   }
 };
 
@@ -669,7 +657,7 @@ const onTouchMove = (event) => {
     return;
   }
   if (event.cancelable) event.preventDefault();
-  emphasizeReplay();
+  playBackward();
 };
 
 const onKey = (event) => {
@@ -682,7 +670,7 @@ const onKey = (event) => {
   if (up && isIphone) return;
   event.preventDefault();
   if (down) playForward();
-  else emphasizeReplay();
+  else playBackward();
 };
 
 const onScroll = () => {
@@ -721,7 +709,7 @@ const onScroll = () => {
   window.scrollTo(0, scrollAnchor);
   correcting = false;
   if (delta > 16) playForward();
-  else if (delta < -16) emphasizeReplay();
+  else if (delta < -16) playBackward();
 };
 
 document.addEventListener("wheel", onWheel, { passive: false, capture: true });
@@ -1057,10 +1045,7 @@ function syncPeaks() {
   const open = pin.classList.contains("is-peaks");
   const atEnd = pin.classList.contains("is-end");
   advance.hidden = open || !atEnd;
-  if (replay) {
-    replay.hidden = open || !atEnd;
-    if (replay.hidden) replay.classList.remove("is-hint");
-  }
+  if (peaks && !isPhone() && atEnd) peaks.hidden = false;
   if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
   if (nextStep) nextStep.hidden = !open || peakIndex >= peakCount - 1;
   if (peakDots) {
@@ -1143,26 +1128,11 @@ const showPeak = (index) => {
   if (!peakFrame) peakFrame = requestAnimationFrame(springPeak);
 };
 
-const flash = document.querySelector(".flash");
-
-const playFlash = () => {
-  if (!flash || reduceMotion.matches) return;
-  flash.hidden = false;
-  flash.classList.remove("is-on");
-  void flash.offsetWidth;
-  flash.classList.add("is-on");
-  flash.addEventListener("animationend", () => {
-    flash.classList.remove("is-on");
-    flash.hidden = true;
-  }, { once: true });
-};
-
 const openPeaks = (index) => {
   if (isPhone()) peaks.hidden = false;
-  pin.classList.add("is-peaks");
   peaks.hidden = false;
+  pin.classList.add("is-peaks");
   showPeak(index);
-  if (!isPhone()) playFlash();
 };
 
 if (peaks && advance && prevStep && nextStep) {
