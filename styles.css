@@ -1208,39 +1208,32 @@ html.is-video-loading .pin.is-away .start-still {
   white-space: nowrap;
 }
 
-.more-email a,
-.more-or,
-.copy-word {
+.more-email a {
   user-select: text;
   -webkit-user-select: text;
 }
 
-.copy-word {
-  font: inherit;
-  font-style: italic;
-  letter-spacing: inherit;
-}
-
 .copy-email {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.22em;
+  display: inline-grid;
+  place-items: center;
+  width: 0.62em;
+  height: 0.62em;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
   margin: 0;
   padding: 0;
   border: 0;
   background: none;
   color: inherit;
   font: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
+  line-height: 1;
   cursor: pointer;
-  text-shadow: inherit;
+  text-shadow: none;
 }
 
 .copy-email svg {
-  width: 0.62em;
-  height: 0.62em;
-  flex: none;
+  width: 100%;
+  height: 100%;
   filter: drop-shadow(0 1px 8px rgba(8, 28, 64, 0.28));
 }
 
@@ -1253,11 +1246,9 @@ html.is-video-loading .pin.is-away .start-still {
   display: block;
 }
 
-.copy-email:hover .copy-word,
-.copy-email:focus-visible .copy-word {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.16em;
+.copy-email:hover,
+.copy-email:focus-visible {
+  transform: scale(1.08);
 }
 
 .copy-email.is-copied {
