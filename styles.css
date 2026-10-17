@@ -1233,6 +1233,15 @@ html.is-video-loading .pin.is-away .start-still {
   height: 100%;
 }
 
+.copy-email .copy-check,
+.copy-email.is-copied .copy-icon {
+  display: none;
+}
+
+.copy-email.is-copied .copy-check {
+  display: block;
+}
+
 .copy-email:hover,
 .copy-email:focus-visible {
   transform: scale(1.08);

@@ -618,7 +618,7 @@ let gestureAnchor = 0;
 
 const controlTarget = (event) => {
   const target = event.target;
-  return Boolean(target && target.closest && target.closest("input, textarea, select, a, .next, .advance, .replay, .step, .peak-exit, .peak-dots, .contact-email, .is-adjustable"));
+  return Boolean(target && target.closest && target.closest("input, textarea, select, a, button, .contact-email, .is-adjustable"));
 };
 
 const onTouchStart = (event) => {
