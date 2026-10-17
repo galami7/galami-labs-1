@@ -174,6 +174,7 @@ const updateChrome = () => {
   const atStart = amount <= 0.02 && !playing && !driving;
   pin.classList.toggle("is-away", !atStart);
   pin.classList.toggle("is-end", atEnd);
+  if (!isPhone() && amount > 0.9) warmPeaks();
   pin.style.removeProperty("--mix");
   endStill.setAttribute("aria-hidden", atEnd ? "false" : "true");
   nextButton.disabled = !atStart;
@@ -1113,8 +1114,9 @@ const springPeak = (now) => {
 let peaksWarm = false;
 
 const warmPeaks = () => {
-  if (peaksWarm || !peaks) return;
+  if (peaksWarm || !peaks || isPhone()) return;
   peaksWarm = true;
+  pin.classList.add("is-warm");
   peaks.hidden = false;
   peaks.querySelectorAll("img").forEach((img) => {
     if (typeof img.decode === "function") img.decode().catch(() => {});

@@ -401,7 +401,8 @@ html.is-video-loading .pin.is-away .start-still {
   transition: opacity 0.48s ease, visibility 0s linear 0s;
 }
 
-.pin.is-end:not(.is-peaks) .peaks:not([hidden]) {
+.pin.is-end:not(.is-peaks) .peaks:not([hidden]),
+.pin.is-warm:not(.is-peaks) .peaks:not([hidden]) {
   visibility: visible;
   z-index: 1;
 }
