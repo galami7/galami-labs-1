@@ -120,7 +120,8 @@ const fitPhonePin = () => {
   pin.style.setProperty("--band-top", "0px");
   pin.style.setProperty("--band-bottom", "0px");
   pin.style.setProperty("--chrome-top", `${Math.max(topBar, safe.top)}px`);
-  pin.style.setProperty("--chrome-bottom", `${Math.max(bottomBar, safe.bottom)}px`);
+  const toolbar = CSS.supports("height", "100svh") ? 0 : bottomBar;
+  pin.style.setProperty("--chrome-bottom", `${Math.max(toolbar, safe.bottom)}px`);
   fitStatementTitle();
 };
 
@@ -1045,7 +1046,10 @@ function syncPeaks() {
   const open = pin.classList.contains("is-peaks");
   const atEnd = pin.classList.contains("is-end");
   advance.hidden = open || !atEnd;
-  if (peaks && !isPhone() && atEnd) peaks.hidden = false;
+  if (peaks && !isPhone()) {
+    peaks.hidden = !open && !atEnd;
+    if (atEnd) warmPeaks();
+  }
   if (prevStep) prevStep.hidden = !open || peakIndex <= 0;
   if (nextStep) nextStep.hidden = !open || peakIndex >= peakCount - 1;
   if (peakDots) {
@@ -1104,6 +1108,17 @@ const springPeak = (now) => {
     peakFrame = requestAnimationFrame(springPeak);
   }
   peaks.style.setProperty("--peak", String(peakPosition));
+};
+
+let peaksWarm = false;
+
+const warmPeaks = () => {
+  if (peaksWarm || !peaks) return;
+  peaksWarm = true;
+  peaks.hidden = false;
+  peaks.querySelectorAll("img").forEach((img) => {
+    if (typeof img.decode === "function") img.decode().catch(() => {});
+  });
 };
 
 const showPeak = (index) => {
@@ -1186,7 +1201,6 @@ if (peaks && advance && prevStep && nextStep) {
   const closePeaks = () => {
     if (moreFog) moreFog.hidden = true;
     pin.classList.remove("is-peaks");
-    if (!isPhone()) peaks.hidden = true;
     cancelAnimationFrame(peakFrame);
     peakFrame = 0;
     peakIndex = 0;
@@ -1204,9 +1218,37 @@ if (peaks && advance && prevStep && nextStep) {
       closePeaks();
     });
   }
+  const copyEmail = document.querySelector(".copy-email");
+  if (copyEmail) {
+    copyEmail.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const address = copyEmail.dataset.email || "";
+      if (!address) return;
+      try {
+        await navigator.clipboard.writeText(address);
+      } catch (error) {
+        const field = document.createElement("textarea");
+        field.value = address;
+        field.setAttribute("readonly", "");
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        document.execCommand("copy");
+        field.remove();
+      }
+      copyEmail.classList.add("is-copied");
+      copyEmail.setAttribute("aria-label", "Email copied");
+      window.setTimeout(() => {
+        copyEmail.classList.remove("is-copied");
+        copyEmail.setAttribute("aria-label", "Copy email address");
+      }, 1400);
+    });
+  }
   if (moreFog) {
     moreFog.addEventListener("click", (event) => {
-      if (event.target.closest("a")) return;
+      if (event.target.closest("a, .copy-email")) return;
       closeMore();
     });
   }

@@ -389,11 +389,21 @@ html.is-video-loading .pin.is-away .start-still {
   z-index: 6;
   overflow: hidden;
   visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   container-type: size;
+  transition: opacity 0.48s ease, visibility 0s linear 0.48s;
 }
 
 .pin.is-peaks .peaks {
   visibility: visible;
+  opacity: 1;
+  transition: opacity 0.48s ease, visibility 0s linear 0s;
+}
+
+.pin.is-end:not(.is-peaks) .peaks:not([hidden]) {
+  visibility: visible;
+  z-index: 1;
 }
 
 .screen-bleed {
@@ -1179,12 +1189,57 @@ html.is-video-loading .pin.is-away .start-still {
   gap: 1.6rem;
 }
 
-.more-links a {
+.more-links a,
+.more-email {
   color: inherit;
   text-decoration: none;
   font: 500 clamp(2.6rem, 6.6vw, 4.6rem)/0.95 system-ui, sans-serif;
   letter-spacing: -0.045em;
   text-shadow: 0 1px 16px rgba(8, 28, 64, 0.28);
+}
+
+.more-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22em;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.more-email a {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.copy-email {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 0.58em;
+  height: 0.58em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+  text-shadow: none;
+  filter: drop-shadow(0 1px 8px rgba(8, 28, 64, 0.28));
+}
+
+.copy-email svg {
+  width: 100%;
+  height: 100%;
+}
+
+.copy-email:hover,
+.copy-email:focus-visible {
+  transform: scale(1.08);
+}
+
+.copy-email.is-copied {
+  color: #fff;
 }
 
 .more-links a:hover,
@@ -1322,15 +1377,15 @@ html.is-video-loading .pin.is-away .start-still {
 
   .pin {
     --band-top: 0px;
-    --band-bottom: 24px;
+    --band-bottom: 0px;
     --chrome-top: env(safe-area-inset-top, 0px);
-    --chrome-bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom, 0px));
+    --chrome-bottom: env(safe-area-inset-bottom, 0px);
     position: sticky;
     z-index: 1;
     top: 0;
     width: 100%;
     height: 100vh;
-    height: 100lvh;
+    height: 100svh;
     background: transparent;
     overflow: hidden;
   }
